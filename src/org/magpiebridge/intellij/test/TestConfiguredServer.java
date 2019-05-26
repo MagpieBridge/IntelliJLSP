@@ -73,6 +73,8 @@ public class TestConfiguredServer extends AnAction {
                 try {
                     FileWriter fw = new FileWriter(File.createTempFile("out", ".txt"));
                     fw.write(Arrays.toString(aa));
+                    fw.write("\n");
+                    fw.flush();
                     IOUtils.copy(server.getErrorStream(), fw, System.getProperty("file.encoding"));
                 } catch (IOException exp) {
                     assert false : exp.getMessage();
