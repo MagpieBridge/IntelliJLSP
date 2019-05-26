@@ -1,5 +1,5 @@
 <idea-plugin>
-  <id>com.your.company.unique.plugin.id</id>
+  <id>org.magpiebridge.intellij</id>
   <name>LSP Support</name>
   <version>1.0</version>
   <vendor email="juliandolby@gmail.com" url="http://www.yourcompany.com">YourCompany</vendor>
@@ -26,11 +26,14 @@
       <className>org.magpiebridge.intellij.plugin.QuickFixes</className>
       <category>SDK Intentions</category>
     </intentionAction>
-  </extensions>
+   </extensions>
 
   <project-components>
     <component>
       <implementation-class>org.magpiebridge.intellij.plugin.QuickFixes</implementation-class>
+    </component>
+    <component>
+      <implementation-class>org.magpiebridge.intellij.plugin.Trigger</implementation-class>
     </component>
   </project-components>
 
