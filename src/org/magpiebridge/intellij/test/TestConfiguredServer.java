@@ -34,12 +34,10 @@ public class TestConfiguredServer extends AnAction {
             String mainClass = pc.getValue(Configuration.MAIN);
             String extraArgs = pc.getValue(Configuration.ARGS);
             String dir = pc.getValue(Configuration.DIR);
-
-            String javaHome = System.getProperty("java.home");
-            File javaPath = new File(javaHome, "bin/java");
+            String jvm = pc.getValue(Configuration.JVM);
 
             List<String> args = new ArrayList<>();
-            args.add(javaPath.getCanonicalPath());
+            args.add(jvm);
             if (jarPath != null && !"".equals(jarPath)) {
                 args.add("-jar");
                 args.add(jarPath);

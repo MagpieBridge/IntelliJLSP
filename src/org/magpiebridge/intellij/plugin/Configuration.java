@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 
 public class Configuration implements Configurable {
 
@@ -16,6 +17,7 @@ public class Configuration implements Configurable {
     public static final String MAIN = "main.class";
     public static final String ARGS = "java.args";
     public static final String DIR = "java.dir";
+    public static final String JVM = "java.jvm";
 
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
@@ -32,8 +34,13 @@ public class Configuration implements Configurable {
         String mainClass = pc.getValue(MAIN, "");
         String args = pc.getValue(ARGS, "");
         String dir = pc.getValue(DIR, "");
+
+        String javaHome = System.getProperty("java.home");
+        File javaPath = new File(javaHome, "bin/java");
+        String jvm = pc.getValue(JVM, javaPath.getAbsolutePath());
+
         JPanel p = new JPanel();
-        p.setLayout(new GridLayout(12, 1));
+        p.setLayout(new GridLayout(14, 1));
 
         JComponent jarText = new JLabel("JAR file path");
         p.add(jarText);
@@ -73,6 +80,13 @@ public class Configuration implements Configurable {
         JTextField dirField = new JTextField(dir, 50);
         dirField.addActionListener(e -> pc.setValue(DIR, dirField.getText()));
         p.add(dirField);
+
+        JComponent jvmText = new JLabel("JVM absolute path");
+        p.add(jvmText);
+
+        JTextField jvmField = new JTextField(jvm, 50);
+        jvmField.addActionListener(e -> pc.setValue(JVM, jvmField.getText()));
+        p.add(jvmField);
 
         return p;
     }
