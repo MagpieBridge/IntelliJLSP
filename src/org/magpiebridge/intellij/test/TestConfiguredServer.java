@@ -56,7 +56,7 @@ public class TestConfiguredServer extends AnAction {
 
             String[] aa = args.toArray(new String[args.size()]);
 
-            try (FileWriter fw = new FileWriter("/tmp/out.txt")) {
+            try (FileWriter fw = new FileWriter(File.createTempFile("out"  , ".txt"))) {
                 fw.write(Arrays.toString(aa));
             }
 
