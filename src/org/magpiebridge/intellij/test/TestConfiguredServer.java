@@ -4,6 +4,7 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -56,10 +57,6 @@ public class TestConfiguredServer extends AnAction {
 
             String[] aa = args.toArray(new String[args.size()]);
 
-            try (FileWriter fw = new FileWriter(File.createTempFile("out"  , ".txt"))) {
-                fw.write(Arrays.toString(aa));
-            }
-
             Process server;
             if (dir != null && !"".equals(dir)) {
                 File pwd = new File(dir);
@@ -72,6 +69,16 @@ public class TestConfiguredServer extends AnAction {
                 server = Runtime.getRuntime().exec(aa);
             }
 
+            new Thread(() -> {
+                try {
+                    FileWriter fw = new FileWriter(File.createTempFile("out", ".txt"));
+                    fw.write(Arrays.toString(aa));
+                    IOUtils.copy(server.getErrorStream(), fw, System.getProperty("file.encoding"));
+                } catch (IOException exp) {
+                    assert false : exp.getMessage();
+                }
+            }).start();
+
             LanguageClient client = new LanguageClient(p);
             Launcher<LanguageServer> serverLauncher =
                     LSPLauncher.createClientLauncher(client, server.getInputStream(), server.getOutputStream());
@@ -81,8 +88,7 @@ public class TestConfiguredServer extends AnAction {
             client.connect(lspServer);
 
             new Service(p, lspServer, client);
-
-        } catch (IOException exc) {
+      } catch (IOException exc) {
             assert false : exc.getMessage();
         }
     }
