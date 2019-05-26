@@ -5,7 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MagpieBridgeLSP.zip" beforeDir="false" afterPath="$PROJECT_DIR$/MagpieBridgeLSP.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestConfiguredServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestConfiguredServer.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -60,8 +59,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-306">
-              <caret line="45" column="23" lean-forward="true" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
+            <state relative-caret-position="345">
+              <caret line="83" column="47" selection-start-line="83" selection-start-column="47" selection-end-line="83" selection-end-column="47" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -81,8 +80,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestConfiguredServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="473">
-              <caret line="54" lean-forward="true" selection-start-line="54" selection-end-line="54" />
+            <state relative-caret-position="525">
+              <caret line="54" selection-start-line="54" selection-end-line="54" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -185,8 +184,8 @@
         <option value="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Util.java" />
         <option value="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Service.java" />
         <option value="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" />
-        <option value="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java" />
         <option value="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestConfiguredServer.java" />
+        <option value="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java" />
       </list>
     </option>
   </component>
@@ -208,8 +207,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -264,6 +261,8 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -382,7 +381,7 @@
   <component name="ToolWindowManager">
     <frame x="40" y="51" width="1400" height="738" extended-state="0" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.34094256" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.35640648" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -558,6 +557,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestConfiguredServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="54" selection-start-line="54" selection-end-line="54" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3405">
@@ -595,20 +604,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestConfiguredServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="473">
-          <caret line="54" lean-forward="true" selection-start-line="54" selection-end-line="54" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-306">
-          <caret line="45" column="23" lean-forward="true" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
+        <state relative-caret-position="345">
+          <caret line="83" column="47" selection-start-line="83" selection-start-column="47" selection-end-line="83" selection-end-column="47" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
