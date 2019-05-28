@@ -26,6 +26,15 @@ public class Launcher {
         String dir = pc.getValue(Configuration.DIR);
         String jvm = pc.getValue(Configuration.JVM);
 
+        ProcessBuilder proc = new ProcessBuilder();
+
+        if (dir != null) {
+            File df = new File(dir);
+            if (df.exists() && df.isDirectory()) {
+                proc.directory(df);
+            }
+        }
+
         List<String> args = new ArrayList<>();
         args.add(jvm);
         if (jarPath != null && !"".equals(jarPath)) {
@@ -42,32 +51,11 @@ public class Launcher {
                 args.add(toks.nextToken());
             }
         }
+        proc.command(args);
 
-        String[] aa = args.toArray(new String[args.size()]);
+        proc.redirectError(new File(dir, "out.txt"));
 
-        Process server;
-        if (dir != null && !"".equals(dir)) {
-            File pwd = new File(dir);
-            if (pwd.exists() && pwd.isDirectory()) {
-                server = Runtime.getRuntime().exec(aa, new String[0], pwd);
-            } else {
-                server = Runtime.getRuntime().exec(aa);
-            }
-        } else {
-            server = Runtime.getRuntime().exec(aa);
-        }
-
-        new Thread(() -> {
-            try {
-                FileWriter fw = new FileWriter(File.createTempFile("out", ".txt"));
-                fw.write(Arrays.toString(aa));
-                fw.write("\n");
-                fw.flush();
-                IOUtils.copy(server.getErrorStream(), fw, System.getProperty("file.encoding"));
-            } catch (IOException exp) {
-                assert false : exp.getMessage();
-            }
-        }).start();
+        Process server = proc.start();
 
         LanguageClient client = new LanguageClient(p);
         org.eclipse.lsp4j.jsonrpc.Launcher<LanguageServer> serverLauncher =
@@ -78,6 +66,5 @@ public class Launcher {
         client.connect(lspServer);
 
         new Service(p, lspServer, client);
-
     }
 }
