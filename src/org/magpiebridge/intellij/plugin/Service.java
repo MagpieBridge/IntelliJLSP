@@ -38,6 +38,8 @@ import java.awt.Color;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.*;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -189,17 +191,19 @@ public class Service {
             busStop.subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
 
                 private void open(@NotNull VirtualFile file) {
-                    try {
-                        DidOpenTextDocumentParams params = new DidOpenTextDocumentParams();
-                        TextDocumentItem doc = new TextDocumentItem();
-                        doc.setUri(file.getUrl());
-                        doc.setLanguageId(file.getExtension());
-                        doc.setText(doc.getText());
-                        params.setTextDocument(doc);
-                        server.getTextDocumentService().didOpen(params);
+                    Document intelliJDoc = FileDocumentManager.getInstance().getDocument(file);
+                    assert intelliJDoc != null;
 
-                        Document intelliJDoc = FileDocumentManager.getInstance().getDocument(file);
-                        assert intelliJDoc != null;
+                    DidOpenTextDocumentParams params = new DidOpenTextDocumentParams();
+                        TextDocumentItem doc = new TextDocumentItem();
+
+                        doc.setUri(Util.fixUrl(file.getUrl()));
+
+                        doc.setLanguageId(file.getExtension());
+                        doc.setText(intelliJDoc.getText());
+                        params.setTextDocument(doc);
+
+                        server.getTextDocumentService().didOpen(params);
 
                         CodeLensParams clp = new CodeLensParams();
                         TextDocumentIdentifier tdi = new TextDocumentIdentifier();
@@ -262,7 +266,7 @@ public class Service {
                                         mp.setCharacter(col);
                                         pos.setPosition(mp);
                                         TextDocumentIdentifier id = new TextDocumentIdentifier();
-                                        id.setUri(file.getUrl());
+                                        id.setUri(Util.fixUrl(file.getUrl()));
                                         pos.setTextDocument(id);
                                         server.getTextDocumentService().hover(pos).thenAccept(h -> {
                                             if (h != null) {
@@ -292,10 +296,7 @@ public class Service {
                             });
                         }
 
-                    } catch (IOException e) {
-
-                    }
-                }
+                 }
 
                 @Override
                 public void fileOpenedSync(@NotNull FileEditorManager source, @NotNull VirtualFile file, @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {

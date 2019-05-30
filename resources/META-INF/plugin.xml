@@ -22,6 +22,7 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <projectConfigurable instance="org.magpiebridge.intellij.plugin.Configuration"></projectConfigurable>
+    <projectService serviceImplementation="org.magpiebridge.intellij.plugin.Trigger"></projectService>
     <intentionAction>
       <className>org.magpiebridge.intellij.plugin.QuickFixes</className>
       <category>SDK Intentions</category>

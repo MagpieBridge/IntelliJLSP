@@ -14,9 +14,27 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class Util {
+
+    public static String fixUrl(String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            URI uri = url.toURI();
+            if (uri.getScheme().equalsIgnoreCase("file")) {
+                uri = Paths.get(uri).toUri();
+            }
+            return uri.toString();
+        } catch (MalformedURLException | URISyntaxException e) {
+            return urlStr;
+        }
+    }
 
     public static Document getDocument(VirtualFile vf) {
         Document[] hack = new Document[1];
