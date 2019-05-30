@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.*;
+import java.io.File;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -145,7 +146,7 @@ public class Service {
 
         String rootPath = project.getBasePath();
         InitializeParams init = new InitializeParams();
-        init.setRootUri(Util.fixUrl("file:" + rootPath));
+        init.setRootUri(Util.fixUrl(rootPath.startsWith("/")? "file:" + rootPath: "file:///" + rootPath));
         init.setTrace("verbose");
         server.initialize(init).thenAccept(ir -> {
             assert ir.getCapabilities().getCodeActionProvider();
@@ -288,11 +289,6 @@ public class Service {
                         }
 
                  }
-
-                @Override
-                public void fileOpenedSync(@NotNull FileEditorManager source, @NotNull VirtualFile file, @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
-//                open(file);
-                }
 
                 @Override
                 public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
