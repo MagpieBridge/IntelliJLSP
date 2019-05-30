@@ -166,18 +166,14 @@ public class Service {
             busStop.subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileDocumentManagerListener() {
                 @Override
                 public void beforeDocumentSaving(@NotNull Document document) {
-                    try {
                         VirtualFile file = FileDocumentManager.getInstance().getFile(document);
                         DidSaveTextDocumentParams params = new DidSaveTextDocumentParams();
                         TextDocumentIdentifier doc = new TextDocumentIdentifier();
                         doc.setUri(file.getUrl());
-                        params.setText(new String(file.contentsToByteArray()));
+                        params.setText(document.getText());
                         params.setTextDocument(doc);
                         server.getTextDocumentService().didSave(params);
-                    } catch (IOException e) {
-                        assert false : e.getMessage();
-                    }
-                }
+                  }
 
                 @Override
                 public void fileContentReloaded(@NotNull VirtualFile file, @NotNull Document document) {
