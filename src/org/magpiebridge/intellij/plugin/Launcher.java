@@ -3,19 +3,39 @@ package org.magpiebridge.intellij.plugin;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.TeeInputStream;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.magpiebridge.intellij.client.LanguageClient;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
 public class Launcher {
+
+    static InputStream logStream(InputStream is, String logFileName) {
+        File log;
+        try {
+            log = File.createTempFile(logFileName, ".txt");
+            return new TeeInputStream(is, new FileOutputStream(log));
+        } catch (IOException e) {
+            return is;
+        }
+    }
+
+    static OutputStream logStream(OutputStream os, String logFileName) {
+        File log;
+        try {
+            log = File.createTempFile(logFileName, ".txt");
+            return new TeeOutputStream(os, new FileOutputStream(log));
+        } catch (IOException e) {
+            return os;
+        }
+    }
 
     public static void launch(Project p) throws IOException {
         PropertiesComponent pc = PropertiesComponent.getInstance();
@@ -56,10 +76,12 @@ public class Launcher {
         proc.redirectError(new File(dir, "out.txt"));
 
         Process server = proc.start();
-
+        
         LanguageClient client = new LanguageClient(p);
         org.eclipse.lsp4j.jsonrpc.Launcher<LanguageServer> serverLauncher =
-                LSPLauncher.createClientLauncher(client, server.getInputStream(), server.getOutputStream());
+                LSPLauncher.createClientLauncher(client,
+                        logStream(server.getInputStream(), "lsp.in.txt"),
+                        logStream(server.getOutputStream(), "lsp.out.txt"));
         serverLauncher.startListening();
 
         LanguageServer lspServer = serverLauncher.getRemoteProxy();
