@@ -3,10 +3,8 @@ package org.magpiebridge.intellij.plugin;
 import com.intellij.AppTopics;
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
-import com.intellij.execution.dashboard.actions.RunAction;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.*;
@@ -19,11 +17,9 @@ import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
-import org.apache.batik.dom.util.DocumentFactory;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -31,15 +27,10 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.magpiebridge.intellij.test.EchoServer;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.net.*;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -154,7 +145,7 @@ public class Service {
 
         String rootPath = project.getBasePath();
         InitializeParams init = new InitializeParams();
-        init.setRootUri("file://" + rootPath);
+        init.setRootUri(Util.fixUrl("file:" + rootPath));
         init.setTrace("verbose");
         server.initialize(init).thenAccept(ir -> {
             assert ir.getCapabilities().getCodeActionProvider();
@@ -207,7 +198,7 @@ public class Service {
 
                         CodeLensParams clp = new CodeLensParams();
                         TextDocumentIdentifier tdi = new TextDocumentIdentifier();
-                        tdi.setUri(file.getUrl());
+                        tdi.setUri(Util.fixUrl(file.getUrl()));
                         clp.setTextDocument(tdi);
                         server.getTextDocumentService().codeLens(clp).thenAccept(cls -> {
                             ApplicationManager.getApplication().runReadAction(() -> {

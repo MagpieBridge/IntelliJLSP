@@ -211,8 +211,12 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         VirtualFile vf = Util.getVirtualFile(file);
 
         Document doc = Util.getDocument(vf);
-        assert doc != null;
-        Editor[] editors = EditorFactory.getInstance().getEditors(doc, project);
+
+        Editor[] hack = EditorFactory.getInstance().getEditors(doc, project);
+        if (hack ==  null || hack.length == 0) {
+            hack = new Editor[]{ EditorFactory.getInstance().createEditor(doc) };
+        }
+        Editor[] editors = hack;
 
         UUID uuid =  UUID.randomUUID();
         pv.clearOldMessages(null, uuid);
