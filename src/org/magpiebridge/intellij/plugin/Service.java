@@ -194,7 +194,7 @@ public class Service {
                         TextDocumentItem doc = new TextDocumentItem();
                         doc.setUri(file.getUrl());
                         doc.setLanguageId(file.getExtension());
-                        doc.setText(new String(file.contentsToByteArray()));
+                        doc.setText(doc.getText());
                         params.setTextDocument(doc);
                         server.getTextDocumentService().didOpen(params);
 
