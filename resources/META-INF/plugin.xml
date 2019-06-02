@@ -40,7 +40,7 @@
 
   <actions>
     <!-- Add your actions here -->
-    <group id="magpiebridge.intellij.tests.Tests" text="Tests for LSP support" popup="true">
+    <!-- group id="magpiebridge.intellij.tests.Tests" text="Tests for LSP support" popup="true">
       <add-to-group group-id="ToolsMenu" anchor="last"/>
       <action id="TestMessages" class="org.magpiebridge.intellij.test.TestMessages" text="TestMessages"
               description="Simple test of messages for LSP">
@@ -74,7 +74,7 @@
     <action id="TestConfiguredServer" class="org.magpiebridge.intellij.test.TestConfiguredServer"
             text="TestConfiguredServer" description="Test Configured Server">
       <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="first"/>
-    </action>
+    </action -->
   </actions>
 
 </idea-plugin>
