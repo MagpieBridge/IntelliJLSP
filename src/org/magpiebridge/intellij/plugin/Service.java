@@ -300,7 +300,9 @@ public class Service {
 
                 }
             });
-        });
+        }
+
+        );
     }
 
     public static Service getInstance(@NotNull Project project) {
