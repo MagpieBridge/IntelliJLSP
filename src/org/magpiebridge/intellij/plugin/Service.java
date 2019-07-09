@@ -13,9 +13,11 @@ import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseEventArea;
 import com.intellij.openapi.editor.event.EditorMouseMotionListener;
-import com.intellij.openapi.fileEditor.*;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.messages.MessageBus;
@@ -31,7 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.*;
-import java.io.File;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -149,7 +150,7 @@ public class Service {
         init.setRootUri(Util.fixUrl(rootPath.startsWith("/")? "file:" + rootPath: "file:///" + rootPath));
         init.setTrace("verbose");
         server.initialize(init).thenAccept(ir -> {
-            assert ir.getCapabilities().getCodeActionProvider();
+            assert ir.getCapabilities().getCodeActionProvider().getLeft();
 
             InitializedParams ip = new InitializedParams();
             server.initialized(ip);
@@ -303,6 +304,10 @@ public class Service {
         }
 
         );
+    }
+
+    public void shutDown(Runnable andThen){
+        server.shutdown().thenRunAsync(andThen);
     }
 
     public static Service getInstance(@NotNull Project project) {

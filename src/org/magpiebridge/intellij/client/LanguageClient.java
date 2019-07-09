@@ -5,16 +5,15 @@ package org.magpiebridge.intellij.client;
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
 import com.intellij.compiler.ProblemsView;
-import com.intellij.compiler.impl.CompileScopeUtil;
 import com.intellij.compiler.progress.CompilerTask;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.compiler.CompileScope;
 import com.intellij.openapi.compiler.CompilerMessage;
 import com.intellij.openapi.compiler.CompilerMessageCategory;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.colors.ColorKey;
@@ -25,14 +24,9 @@ import com.intellij.openapi.editor.event.EditorMouseMotionListener;
 import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.Key;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.LightweightHint;
@@ -47,11 +41,10 @@ import org.magpiebridge.intellij.plugin.Util;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import java.awt.*;
 import java.awt.Color;
-import java.io.File;
-import java.util.*;
+import java.awt.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient {
@@ -363,11 +356,27 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 
     @Override
     public void showMessage(@NotNull MessageParams messageParams) {
-        showMessage(messageParams.getType() + ": " + messageParams.getMessage());
+        //showMessage(messageParams.getType() + ": " + messageParams.getMessage());
+        NotificationType type;
+        switch (messageParams.getType()){
+            case Warning:
+                type = NotificationType.WARNING;
+                break;
+            case Error:
+                type = NotificationType.ERROR;
+                break;
+            case Log:
+            case Info:
+            default:
+                type = NotificationType.INFORMATION;
+                break;
+        }
+        Notifications.Bus.notify(new Notification("lsp", messageParams.getType().toString(), messageParams.getMessage(),type), project);
     }
 
     public void showMessage(String msg) {
         WriteCommandAction.runWriteCommandAction(project, () -> {
+
             for (Editor editor : EditorFactory.getInstance().getAllEditors()) {
                 int flags = HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
                 JComponent hintText = new JLabel(msg);

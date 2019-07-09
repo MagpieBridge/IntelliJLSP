@@ -26,4 +26,9 @@ public class Trigger implements ProjectComponent {
 
         }
     }
+
+    @Override
+    public void projectClosed() {
+        Launcher.shutDown(project);
+    }
 }
