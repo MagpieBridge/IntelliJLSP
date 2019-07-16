@@ -26,11 +26,15 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.ui.popup.JBPopupListener;
+import com.intellij.openapi.ui.popup.LightweightWindowEvent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.LightweightHint;
-import com.intellij.ui.table.JBTable;
+import com.intellij.ui.awt.RelativePoint;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -40,7 +44,6 @@ import org.magpiebridge.intellij.plugin.QuickFixes;
 import org.magpiebridge.intellij.plugin.Util;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import java.awt.Color;
 import java.awt.*;
 import java.util.List;
@@ -147,6 +150,7 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
     private LanguageServer server;
     private final ProblemsView pv;
     private final QuickFixes intentions;
+    private final Map<VirtualFile, List<Diagnostic>> publishedDiagnostics = new HashMap<>();
 
     public LanguageClient(Project project, LanguageServer server) {
         this(project);
@@ -176,6 +180,27 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         }
     }
 
+    private void setSelection(String file, Range range){
+        VirtualFile vf = Util.getVirtualFile(file);
+        Document doc = Util.getDocument(vf);
+        Editor[] editors = EditorFactory.getInstance().getEditors(doc, project);
+        Position start = range.getStart();
+        int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
+        Position end = range.getEnd();
+        int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
+
+        Editor activeEditor;
+        if (editors.length > 0)
+            activeEditor = editors[0];
+        else {
+            activeEditor = EditorFactory.getInstance().createEditor(doc, project,EditorKind.MAIN_EDITOR);
+        }
+        activeEditor.getSelectionModel().setSelection(startOffset, endOffset);
+        activeEditor.getCaretModel().moveToOffset(startOffset);
+
+
+    }
+
     @Override
     public CompletableFuture<ApplyWorkspaceEditResponse> applyEdit(ApplyWorkspaceEditParams params) {
         WriteCommandAction.runWriteCommandAction(project, () ->
@@ -194,22 +219,24 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 
     @Override
     public void publishDiagnostics(PublishDiagnosticsParams params) {
-        int flags = HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
-
-        final TextAttributes attr = new TextAttributes();
-        attr.setEffectColor(JBColor.RED);
-        attr.setEffectType(EffectType.WAVE_UNDERSCORE);
 
         String file = params.getUri();
         VirtualFile vf = Util.getVirtualFile(file);
 
-        Document doc = Util.getDocument(vf);
+        this.publishedDiagnostics.put(vf, params.getDiagnostics());
+        showDiagnostics(vf);
+    }
 
-        Editor[] editors = EditorFactory.getInstance().getEditors(doc, project);
+    public void showDiagnostics(VirtualFile vf){
+        if (!publishedDiagnostics.containsKey(vf)){
+            return;
+        }
+        Document doc = Util.getDocument(vf);
+        List<Diagnostic> diagnostics = publishedDiagnostics.get(vf);
 
         UUID uuid =  UUID.randomUUID();
         pv.clearOldMessages(null, uuid);
-        params.getDiagnostics().forEach((diag) -> {
+        diagnostics.forEach((diag) -> {
             Range rng = diag.getRange();
             Position start = rng.getStart();
             int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
@@ -251,106 +278,145 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         });
 
         intentions.clear();
-        params.getDiagnostics().forEach((diag) -> {
-            intentions.addDiagnostic(doc, params.getUri(), diag, server);
-        });
+        diagnostics.forEach((diag) -> intentions.addDiagnostic(doc, vf.getUrl(), diag, server));
 
+        Editor[] editors = EditorFactory.getInstance().getEditors(doc, project);
         for (Editor editor : editors) {
-            if (editorListeners.containsKey(editor)) {
-                editorListeners.get(editor).forEach(l -> editor.removeEditorMouseMotionListener(l));
-            }
-            WriteCommandAction.runWriteCommandAction(project, () -> {
-                MarkupModel markup = editor.getMarkupModel();
-                markup.removeAllHighlighters();
-            });
+            clearMarkup(editor);
         }
         editorListeners.clear();
 
-        params.getDiagnostics().forEach((diag) -> {
-            Range rng = diag.getRange();
-            Position start = rng.getStart();
-            int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
-            Position end = rng.getEnd();
-            int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
+        diagnostics.forEach((diag) -> {
 
             for (Editor editor : editors) {
-                WriteCommandAction.runWriteCommandAction(project, () -> {
-                    MarkupModel markup = editor.getMarkupModel();
-                    markup.addRangeHighlighter(startOffset,
-                        endOffset,
-                        HighlighterLayer.WEAK_WARNING,
-                        attr,
-                        HighlighterTargetArea.EXACT_RANGE);
-                });
-
-                EditorMouseMotionListener l;
-                editor.addEditorMouseMotionListener(l = new EditorMouseMotionListener() {
-                    private void handleEvent(EditorMouseEvent e) {
-                        if (e.getArea().equals(EditorMouseEventArea.EDITING_AREA)) {
-                            int offset = editor.logicalPositionToOffset(editor.xyToLogicalPosition(e.getMouseEvent().getPoint()));
-                            if (offset >= startOffset && offset <= endOffset) {
-                                String msg = diag.getMessage();
-                                if (msg.length() > 100) {
-                                    msg = msg.substring(0, 95) + "...";
-                                }
-                                JComponent hintText = new JLabel(msg);
-                                if (diag.getRelatedInformation() != null && diag.getRelatedInformation().size() > 0) {
-                                    List<DiagnosticRelatedInformation> info = diag.getRelatedInformation();
-                                    JPanel p = new JPanel();
-                                    p.setLayout(new GridLayout(3, 1));
-                                    p.add(hintText);
-                                    p.add(new JSeparator());
-                                    p.add(
-                                            new JBTable(new AbstractTableModel() {
-                                                public int getColumnCount() {
-                                                    return 2;
-                                                }
-
-                                                public int getRowCount() {
-                                                    return info.size();
-                                                }
-
-                                                public Object getValueAt(int row, int col) {
-                                                    DiagnosticRelatedInformation d = diag.getRelatedInformation().get(row);
-                                                    return col == 0 ? d.getLocation().toString() : d.getMessage();
-                                                }
-                                            }));
-                                    hintText = p;
-                                }
-                                LightweightHint hint = new LightweightHint(hintText);
-                                Point p = HintManagerImpl.getHintPosition(hint, editor, editor.offsetToLogicalPosition(offset), HintManager.ABOVE);
-                                HintManagerImpl.getInstanceImpl().showEditorHint(hint,
-                                        editor,
-                                        p,
-                                        flags,
-                                        -1,
-                                        true,
-                                        HintManagerImpl.createHintHint(editor,
-                                                p,
-                                                hint,
-                                                HintManager.ABOVE).setContentActive(true));
-
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void mouseMoved(@NotNull EditorMouseEvent e) {
-                        handleEvent(e);
-                    }
-
-                    @Override
-                    public void mouseDragged(@NotNull EditorMouseEvent e) {
-                        handleEvent(e);
-                    }
-                });
-
-                if (! editorListeners.containsKey(editor)) {
-                    editorListeners.put(editor, new HashSet<>());
-                }
-
-                editorListeners.get(editor).add(l);
+                showMarkup(diag, editor, doc);
             }
+        });
+    }
+
+    private Balloon currentHint = null;
+    private Diagnostic currHintDiag = null;
+
+    private void showMarkup(Diagnostic diag, Editor editor, Document doc) {
+        int flags =0;// HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
+
+        final TextAttributes attr = new TextAttributes();
+        attr.setEffectColor(JBColor.RED);
+        attr.setEffectType(EffectType.WAVE_UNDERSCORE);
+
+        Range rng = diag.getRange();
+        Position start = rng.getStart();
+        int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
+        Position end = rng.getEnd();
+        int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
+
+        WriteCommandAction.runWriteCommandAction(project, () -> {
+            MarkupModel markup = editor.getMarkupModel();
+            markup.addRangeHighlighter(startOffset,
+                endOffset,
+                HighlighterLayer.WEAK_WARNING,
+                attr,
+                HighlighterTargetArea.EXACT_RANGE);
+        });
+
+        EditorMouseMotionListener l;
+        editor.addEditorMouseMotionListener(l = new EditorMouseMotionListener() {
+            private void handleEvent(EditorMouseEvent e) {
+                if (e.getArea().equals(EditorMouseEventArea.EDITING_AREA)) {
+                    int offset = editor.logicalPositionToOffset(editor.xyToLogicalPosition(e.getMouseEvent().getPoint()));
+                    if (offset >= startOffset && offset <= endOffset) {
+                        if (diag == currHintDiag && currentHint != null){
+                            return;
+                        }
+                        String msg = diag.getMessage();
+                        if (msg.length() > 100) {
+                            msg = msg.substring(0, 95) + "...";
+                        }
+                        JComponent hintText = new JLabel(msg);
+
+                        List<DiagnosticRelatedInformation> info = diag.getRelatedInformation();
+                        if (info != null && info.size() > 0) {
+                            JPanel p = new JPanel();
+                            p.setLayout(new GridLayout(0, 1));
+                            p.add(hintText);
+                            p.add(new JLabel("Related Information"));
+                            JPanel relInfoPanel = new JPanel();
+                            relInfoPanel.setLayout(new GridLayout(0,2));
+                            p.add(relInfoPanel);
+                            info.sort(Comparator.comparingInt(d -> d.getLocation().getRange().getStart().getLine()));
+                            info.forEach(d->{
+                                String fileName = d.getLocation().getUri();
+                                String[] pathParts = fileName.split("/|\\\\");
+                                fileName = pathParts[pathParts.length-1];
+                                Range codeRange = d.getLocation().getRange();
+                                JButton gotoButton = new JButton(fileName.concat("("+codeRange.getStart().getLine()+", "+codeRange.getStart().getCharacter()+"):"));
+                                gotoButton.setOpaque(false);
+                                gotoButton.setBorderPainted(false);
+                                gotoButton.addActionListener(click->{
+                                    setSelection(d.getLocation().getUri(),codeRange);
+                                    currentHint.dispose();
+                                });
+                                relInfoPanel.add(gotoButton);
+                                relInfoPanel.add(new JLabel(d.getMessage()));
+                            });
+                            hintText = p;
+                        }
+//                        LightweightHint hint = new LightweightHint(hintText);
+////                        Point p = HintManagerImpl.getHintPosition(hint, editor, editor.offsetToLogicalPosition(offset), HintManager.ABOVE);
+////                        HintManagerImpl.getInstanceImpl().showEditorHint(
+////                                hint,
+////                                editor,
+////                                p,
+////                                flags,
+////                                100000,
+////                                false,
+////                                HintManagerImpl.createHintHint(editor,
+////                                p,
+////                                hint,
+////                                HintManager.ABOVE).setContentActive(true));
+                        if (currentHint != null){
+                            currentHint.dispose();
+                        }
+                        currentHint = JBPopupFactory.getInstance().createBalloonBuilder(hintText).createBalloon();
+                        currentHint.show(new RelativePoint(e.getMouseEvent()), Balloon.Position.above);
+                        currHintDiag = diag;
+                        currentHint.addListener(new JBPopupListener() {
+                            @Override
+                            public void onClosed(@NotNull LightweightWindowEvent event) {
+                                currentHint.dispose();
+                                currentHint = null;
+                                currHintDiag = null;
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void mouseMoved(@NotNull EditorMouseEvent e) {
+                handleEvent(e);
+            }
+
+            @Override
+            public void mouseDragged(@NotNull EditorMouseEvent e) {
+                handleEvent(e);
+            }
+        });
+
+        if (! editorListeners.containsKey(editor)) {
+            editorListeners.put(editor, new HashSet<>());
+        }
+
+        editorListeners.get(editor).add(l);
+    }
+
+    private void clearMarkup(Editor editor) {
+        if (editorListeners.containsKey(editor)) {
+            editorListeners.remove(editor).forEach(l -> editor.removeEditorMouseMotionListener(l));
+        }
+        WriteCommandAction.runWriteCommandAction(project, () -> {
+            MarkupModel markup = editor.getMarkupModel();
+            markup.removeAllHighlighters();
         });
     }
 

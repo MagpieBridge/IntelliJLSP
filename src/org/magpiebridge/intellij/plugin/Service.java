@@ -244,52 +244,55 @@ public class Service {
                     });
                     */
 
-                        for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
-                            e.addEditorMouseMotionListener(new EditorMouseMotionListener() {
-                                @Override
-                                public void mouseMoved(@NotNull EditorMouseEvent ev) {
-                                    if (ev.getArea().equals(EditorMouseEventArea.EDITING_AREA)) {
-                                        TextDocumentPositionParams pos = new TextDocumentPositionParams();
-                                        Position mp = new Position();
-                                        int offset = e.logicalPositionToOffset(e.xyToLogicalPosition(ev.getMouseEvent().getPoint()));
-                                        LogicalPosition logicalPos = e.offsetToLogicalPosition(offset);
-                                        int line = intelliJDoc.getLineNumber(offset);
-                                        int col = offset - intelliJDoc.getLineStartOffset(line);
-                                        mp.setLine(line);
-                                        mp.setCharacter(col);
-                                        pos.setPosition(mp);
-                                        TextDocumentIdentifier id = new TextDocumentIdentifier();
-                                        id.setUri(Util.fixUrl(file.getUrl()));
-                                        pos.setTextDocument(id);
-                                        server.getTextDocumentService().hover(pos).thenAccept(h -> {
-                                            if (h != null) {
-                                                String text = "";
-                                                if (h.getContents().isLeft()) {
-                                                    for (Either<String,MarkedString> str : h.getContents().getLeft()) {
-                                                        if (str.isRight()) {
-                                                            MarkedString ms = str.getRight();
-                                                            text += ms;
-                                                         } else {
-                                                            text += str.getLeft();
-                                                        }
+                    for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
+                        e.addEditorMouseMotionListener(new EditorMouseMotionListener() {
+                            @Override
+                            public void mouseMoved(@NotNull EditorMouseEvent ev) {
+                                if (ev.getArea().equals(EditorMouseEventArea.EDITING_AREA)) {
+                                    TextDocumentPositionParams pos = new TextDocumentPositionParams();
+                                    Position mp = new Position();
+                                    int offset = e.logicalPositionToOffset(e.xyToLogicalPosition(ev.getMouseEvent().getPoint()));
+                                    LogicalPosition logicalPos = e.offsetToLogicalPosition(offset);
+                                    int line = intelliJDoc.getLineNumber(offset);
+                                    int col = offset - intelliJDoc.getLineStartOffset(line);
+                                    mp.setLine(line);
+                                    mp.setCharacter(col);
+                                    pos.setPosition(mp);
+                                    TextDocumentIdentifier id = new TextDocumentIdentifier();
+                                    id.setUri(Util.fixUrl(file.getUrl()));
+                                    pos.setTextDocument(id);
+                                    server.getTextDocumentService().hover(pos).thenAccept(h -> {
+                                        if (h != null) {
+                                            String text = "";
+                                            if (h.getContents().isLeft()) {
+                                                for (Either<String, MarkedString> str : h.getContents().getLeft()) {
+                                                    if (str.isRight()) {
+                                                        MarkedString ms = str.getRight();
+                                                        text += ms;
+                                                    } else {
+                                                        text += str.getLeft();
                                                     }
-                                                } else {
-                                                    MarkupContent mc = h.getContents().getRight();
-                                                    text += mc.getValue();
                                                 }
-                                                LightweightHint hint = new LightweightHint(new JLabel(text));
-                                                Point p = HintManagerImpl.getHintPosition(hint, e, logicalPos, HintManager.ABOVE);
-                                                HintManagerImpl.getInstanceImpl().showEditorHint(hint, e, p, flags, -1, true,
-                                                        HintManagerImpl.createHintHint(e, p, hint,
-                                                                HintManager.ABOVE).setContentActive(true));
+                                            } else {
+                                                MarkupContent mc = h.getContents().getRight();
+                                                text += mc.getValue();
                                             }
-                                        });
-                                    }
+                                            LightweightHint hint = new LightweightHint(new JLabel(text));
+                                            Point p = HintManagerImpl.getHintPosition(hint, e, logicalPos, HintManager.ABOVE);
+                                            HintManagerImpl.getInstanceImpl().showEditorHint(hint, e, p, flags, -1, true,
+                                                    HintManagerImpl.createHintHint(e, p, hint,
+                                                            HintManager.ABOVE).setContentActive(true));
+                                        }
+                                    });
                                 }
-                            });
-                        }
+                            }
+                        });
+                    }
 
-                 }
+                    if (lc instanceof org.magpiebridge.intellij.client.LanguageClient) {
+                        ((org.magpiebridge.intellij.client.LanguageClient) lc).showDiagnostics(file);
+                    }
+                }
 
                 @Override
                 public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
