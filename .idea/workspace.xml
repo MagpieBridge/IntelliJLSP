@@ -4,8 +4,7 @@
     <list default="true" id="013b7a03-4af3-42b2-bda2-df133cde2e26" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MagpieBridgeLSP.zip" beforeDir="false" afterPath="$PROJECT_DIR$/MagpieBridgeLSP.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Service.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/resources/META-INF/plugin.xml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,7 +21,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1190">
+            <state relative-caret-position="945">
               <caret line="83" column="47" selection-start-line="83" selection-start-column="47" selection-end-line="83" selection-end-column="47" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -34,7 +33,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestRemoteServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
+            <state relative-caret-position="330">
               <caret line="34" selection-start-line="29" selection-start-column="10" selection-end-line="34" />
             </state>
           </provider>
@@ -43,7 +42,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestConfiguredServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
+            <state relative-caret-position="135">
               <caret line="13" column="42" selection-start-line="13" selection-start-column="42" selection-end-line="13" selection-end-column="42" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -55,8 +54,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Launcher.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="35" column="22" selection-start-line="35" selection-start-column="22" selection-end-line="35" selection-end-column="22" />
+            <state relative-caret-position="285">
+              <caret line="35" column="9" selection-start-line="35" selection-start-column="9" selection-end-line="35" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -67,7 +66,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3859">
+            <state relative-caret-position="3465">
               <caret line="300" column="60" selection-start-line="300" selection-start-column="60" selection-end-line="300" selection-end-column="60" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -79,8 +78,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/resources/META-INF/plugin.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="22" selection-start-line="22" selection-end-line="23" />
+            <state relative-caret-position="-465">
+              <caret line="27" column="32" selection-start-line="27" selection-start-column="32" selection-end-line="27" selection-end-column="32" />
             </state>
           </provider>
         </entry>
@@ -88,7 +87,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resources/intentionDescriptions/QuickFixes/description.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
+            <state relative-caret-position="105">
               <caret line="7" selection-start-line="7" selection-end-line="7" />
             </state>
           </provider>
@@ -97,7 +96,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Trigger.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
+            <state relative-caret-position="285">
               <caret line="26" column="9" selection-start-line="26" selection-start-column="9" selection-end-line="26" selection-end-column="9" />
             </state>
           </provider>
@@ -106,7 +105,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/QuickFixes.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="680">
+            <state relative-caret-position="600">
               <caret line="67" column="22" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -118,7 +117,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Util.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
+            <state relative-caret-position="210">
               <caret line="32" column="59" selection-start-line="32" selection-start-column="59" selection-end-line="32" selection-end-column="59" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -193,7 +192,7 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="61" />
-    <option name="y" value="93" />
+    <option name="y" value="92" />
     <option name="width" value="1244" />
     <option name="height" value="766" />
   </component>
@@ -202,8 +201,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -230,40 +227,14 @@
             </path>
             <path>
               <item name="IntelliJLSP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="IntelliJLSP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="IntelliJLSP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="IntelliJLSP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="intellij" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="IntelliJLSP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="IntelliJLSP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="intellij" type="462c0819:PsiDirectoryNode" />
-              <item name="client" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="IntelliJLSP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="IntelliJLSP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="intellij" type="462c0819:PsiDirectoryNode" />
-              <item name="plugin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="IntelliJLSP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="IntelliJLSP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="intellij" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -273,10 +244,11 @@
     <property name="Repository.Attach.JavaDocs" value="false" />
     <property name="Repository.Attach.Sources" value="false" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1568922258694" />
     <property name="extract.method.default.visibility" value="private" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Project" />
-    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="org.magpiebridge.intellij.plugin.Configuration" />
   </component>
@@ -380,10 +352,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="61" y="93" width="1244" height="766" extended-state="0" />
-    <editor active="true" />
+    <frame x="61" y="92" width="1244" height="766" extended-state="0" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24746622" />
+      <window_info id="Learn" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2512479" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -398,9 +370,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.4992636" weight="0.32905295" />
       <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49558175" weight="0.32744783" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50073636" side_tool="true" weight="0.32744783" />
-      <window_info anchor="bottom" id="Version Control" order="9" visible="true" weight="0.25245902" />
-      <window_info anchor="bottom" id="Messages" order="10" sideWeight="0.4992636" weight="0.3254902" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50083196" side_tool="true" weight="0.25222552" />
+      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.49916804" weight="0.25222552" />
+      <window_info anchor="bottom" id="Messages" order="10" sideWeight="0.4992636" visible="true" weight="0.3249258" />
       <window_info anchor="bottom" id="Problems" order="11" weight="0.39872068" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -541,7 +513,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1190">
+        <state relative-caret-position="945">
           <caret line="83" column="47" selection-start-line="83" selection-start-column="47" selection-end-line="83" selection-end-column="47" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -551,14 +523,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestRemoteServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
+        <state relative-caret-position="330">
           <caret line="34" selection-start-line="29" selection-start-column="10" selection-end-line="34" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestConfiguredServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
+        <state relative-caret-position="135">
           <caret line="13" column="42" selection-start-line="13" selection-start-column="42" selection-end-line="13" selection-end-column="42" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -568,8 +540,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Launcher.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="35" column="22" selection-start-line="35" selection-start-column="22" selection-end-line="35" selection-end-column="22" />
+        <state relative-caret-position="285">
+          <caret line="35" column="9" selection-start-line="35" selection-start-column="9" selection-end-line="35" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -578,7 +550,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3859">
+        <state relative-caret-position="3465">
           <caret line="300" column="60" selection-start-line="300" selection-start-column="60" selection-end-line="300" selection-end-column="60" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -586,16 +558,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/resources/intentionDescriptions/QuickFixes/description.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" selection-start-line="7" selection-end-line="7" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Trigger.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
+        <state relative-caret-position="285">
           <caret line="26" column="9" selection-start-line="26" selection-start-column="9" selection-end-line="26" selection-end-column="9" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/QuickFixes.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
+        <state relative-caret-position="600">
           <caret line="67" column="22" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -605,7 +584,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Util.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
+        <state relative-caret-position="210">
           <caret line="32" column="59" selection-start-line="32" selection-start-column="59" selection-end-line="32" selection-end-column="59" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -613,17 +592,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/resources/intentionDescriptions/QuickFixes/description.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" selection-start-line="7" selection-end-line="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/resources/META-INF/plugin.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="22" selection-start-line="22" selection-end-line="23" />
+        <state relative-caret-position="-465">
+          <caret line="27" column="32" selection-start-line="27" selection-start-column="32" selection-end-line="27" selection-end-column="32" />
         </state>
       </provider>
     </entry>
@@ -644,6 +616,7 @@
       </state>
       <state key="FacetStructureConfigurable.UI">
         <settings>
+          <last-edited>No facets are configured</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -655,6 +628,7 @@
       </state>
       <state key="GlobalLibrariesConfigurable.UI">
         <settings>
+          <last-edited>scala-sdk-2.12.7</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -666,6 +640,7 @@
       </state>
       <state key="JdkListConfigurable.UI">
         <settings>
+          <last-edited>1.8</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -677,6 +652,7 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
+          <last-edited>MagpieBridgeLSP</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
