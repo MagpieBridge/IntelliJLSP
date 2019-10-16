@@ -61,7 +61,7 @@ public class QuickFixes extends AbstractIntentionAction {
     @NotNull
     @Override
     public String getText() {
-        return "Quick fixes";
+        return "Code actions";
     }
 
     public void clear() {
@@ -113,6 +113,24 @@ public class QuickFixes extends AbstractIntentionAction {
         Logger.getInstance(getClass()).info("this: " + this);
 
         IPopupChooserBuilder<QuickFix> popup = JBPopupFactory.getInstance().createPopupChooserBuilder(Arrays.asList(newText));
+
+        if (! lowerBound.containsKey(doc)) { lowerBound.put(doc, new TreeMap<>()); }
+        lowerBound.get(doc).put(startOffset, popup);
+        if (! upperBound.containsKey(doc)) { upperBound.put(doc, new TreeMap<>()); }
+        upperBound.get(doc).put(endOffset, popup);
+    }
+
+    public void addCodeActions(Document doc, Range range, LanguageServer server, List<? extends Either<Command, CodeAction>> actions) {
+        Position start = range.getStart();
+        int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
+        Position end = range.getEnd();
+        int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
+
+        List<QuickFix> fixes = new ArrayList<>();
+        actions.forEach(c ->  {
+            fixes.add(new QuickFix(c, server));
+        });
+        IPopupChooserBuilder<QuickFix> popup = JBPopupFactory.getInstance().createPopupChooserBuilder(fixes);
 
         if (! lowerBound.containsKey(doc)) { lowerBound.put(doc, new TreeMap<>()); }
         lowerBound.get(doc).put(startOffset, popup);

@@ -2,7 +2,7 @@
   <id>org.magpiebridge.intellij</id>
   <name>LSP Support</name>
   <version>1.0</version>
-  <vendor email="juliandolby@gmail.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <vendor email="juliandolby@gmail.com" url="https://github.com/MagpieBridge">MagpieBridge</vendor>
 
   <description><![CDATA[
       Support for LSP, created for Magpie Bridge.

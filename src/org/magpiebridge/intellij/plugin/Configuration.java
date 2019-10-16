@@ -34,7 +34,7 @@ public class Configuration implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
-        return "LSP Configuration";
+        return "MagpieBridge LSP Configuration";
     }
 
     @Nullable

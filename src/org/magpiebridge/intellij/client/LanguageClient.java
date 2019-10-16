@@ -245,11 +245,18 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                 @NotNull
                 @Override
                 public CompilerMessageCategory getCategory() {
-                    return  CompilerMessageCategory.INFORMATION;
+                    DiagnosticSeverity severity=diag.getSeverity();
+                    if(severity.equals(DiagnosticSeverity.Error))
+                        return CompilerMessageCategory.ERROR;
+                    if(severity.equals(DiagnosticSeverity.Warning))
+                        return CompilerMessageCategory.WARNING;
+                    return CompilerMessageCategory.INFORMATION;
                 }
 
                 @Override
                 public String getMessage() {
+                    if(diag.getSource()!=null)
+                        return diag.getMessage()+" ["+diag.getSource()+"]";
                     return diag.getMessage();
                 }
 
@@ -271,7 +278,7 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 
                 @Override
                 public String getRenderTextPrefix() {
-                    return "MagpieBridge";
+                    return "";
                 }
             };
             pv.addMessage(msg, uuid);
@@ -329,17 +336,21 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                             return;
                         }
                         String msg = diag.getMessage();
-                        if (msg.length() > 100) {
+                        if (msg.length() > 200) {
                             msg = msg.substring(0, 95) + "...";
                         }
-                        JComponent hintText = new JLabel(msg);
-
+                        if(diag.getSource()!=null)
+                            msg="["+ diag.getSource()+"] "+msg;
+                        JLabel label= new JLabel(msg);
+                        label.setBackground(Color.lightGray);
+                        JComponent hintText =label;
+                        //show related information
                         List<DiagnosticRelatedInformation> info = diag.getRelatedInformation();
                         if (info != null && info.size() > 0) {
                             JPanel p = new JPanel();
-                            p.setLayout(new GridLayout(0, 1));
+                            p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
                             p.add(hintText);
-                            p.add(new JLabel("Related Information"));
+                            //p.add(new JLabel("Related Information"));
                             JPanel relInfoPanel = new JPanel();
                             relInfoPanel.setLayout(new GridLayout(0,2));
                             p.add(relInfoPanel);
@@ -349,7 +360,9 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                                 String[] pathParts = fileName.split("/|\\\\");
                                 fileName = pathParts[pathParts.length-1];
                                 Range codeRange = d.getLocation().getRange();
-                                JButton gotoButton = new JButton(fileName.concat("("+codeRange.getStart().getLine()+", "+codeRange.getStart().getCharacter()+"):"));
+                                int line=codeRange.getStart().getLine()+1;
+                                int column=codeRange.getStart().getCharacter()+1;
+                                JButton gotoButton = new JButton(fileName.concat("("+line+", "+column+"):"));
                                 gotoButton.setOpaque(false);
                                 gotoButton.setBorderPainted(false);
                                 gotoButton.addActionListener(click->{

@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -136,10 +137,12 @@ public class Service {
     private final LanguageServer server;
 
     private final Project project;
+    private  QuickFixes codeActions;
 
     public Service(Project project, LanguageServer server, LanguageClient lc) {
         this.project = project;
         this.server = server;
+        this.codeActions = project.getComponent(QuickFixes.class);
 
         if (server instanceof LanguageClientAware) {
             ((LanguageClientAware)server).connect(lc);
@@ -259,8 +262,21 @@ public class Service {
                                     mp.setCharacter(col);
                                     pos.setPosition(mp);
                                     TextDocumentIdentifier id = new TextDocumentIdentifier();
-                                    id.setUri(Util.fixUrl(file.getUrl()));
+                                    String uri= Util.fixUrl(file.getUrl());
+                                    id.setUri(uri);
                                     pos.setTextDocument(id);
+                                    CodeActionParams codeActionParams = new CodeActionParams();
+                                    Range range =new Range(mp, mp);
+                                    codeActionParams.setRange(range);
+                                    codeActionParams.setTextDocument(id);
+                                    codeActionParams.setContext(new CodeActionContext(new ArrayList<Diagnostic>()));
+                                    server.getTextDocumentService().codeAction(codeActionParams).thenAccept(actions->{
+                                        if(actions.size()>=0) {
+                                            codeActions.addCodeActions(Util.getDocument(file), range, server, actions);
+                                        }
+                                    });
+
+
                                     server.getTextDocumentService().hover(pos).thenAccept(h -> {
                                         if (h != null) {
                                             String text = "";
