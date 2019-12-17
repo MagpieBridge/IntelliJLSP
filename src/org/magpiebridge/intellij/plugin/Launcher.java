@@ -1,7 +1,9 @@
 package org.magpiebridge.intellij.plugin;
 
+import com.google.common.io.ByteSink;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -54,6 +56,7 @@ public class Launcher {
         String extraArgs = pc.getValue(Configuration.ARGS);
         String dir = pc.getValue(Configuration.DIR);
         String jvm = pc.getValue(Configuration.JVM);
+        String jvmArgs = pc.getValue(Configuration.JVM_ARGS);
 
         ProcessBuilder proc = new ProcessBuilder();
 
@@ -66,6 +69,12 @@ public class Launcher {
 
         List<String> args = new ArrayList<>();
         args.add(jvm);
+        if (jvmArgs != null && !"".equals(jvmArgs)) {
+            StringTokenizer xs = new StringTokenizer(jvmArgs);
+            while (xs.hasMoreTokens()) {
+                args.add(xs.nextToken());
+            }
+        }
         if (jarPath != null && !"".equals(jarPath)) {
             args.add("-jar");
             args.add(jarPath);
@@ -85,8 +94,8 @@ public class Launcher {
             }
         }
         proc.command(args);
-
-        proc.redirectError(new File(dir, "out.txt"));
+        proc.redirectErrorStream(false);
+        proc.redirectError(File.createTempFile("lsp.err", ".txt"));
 
         Process server = proc.start();
 
@@ -128,9 +137,8 @@ public class Launcher {
     }
 
     public static void shutDown(Project p) {
-        shutDown(p, () -> {
-        });
-    }
+        shutDown(p, () -> {  });
+     }
 
     public static void shutDown(Project p, Runnable onFinish) {
         Service service = services.get(p);
@@ -149,5 +157,8 @@ public class Launcher {
             }
             onFinish.run();
         });
+
+        services.remove(p);
+        processes.remove(p);
     }
 }

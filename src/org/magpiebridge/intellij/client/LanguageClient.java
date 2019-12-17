@@ -5,19 +5,17 @@ package org.magpiebridge.intellij.client;
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
 import com.intellij.compiler.ProblemsView;
-import com.intellij.compiler.progress.CompilerTask;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.compiler.CompilerMessage;
 import com.intellij.openapi.compiler.CompilerMessageCategory;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.*;
-import com.intellij.openapi.editor.colors.ColorKey;
-import com.intellij.openapi.editor.colors.EditorFontType;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.EditorKind;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseEventArea;
 import com.intellij.openapi.editor.event.EditorMouseMotionListener;
@@ -36,7 +34,6 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.LightweightHint;
 import com.intellij.ui.awt.RelativePoint;
 import org.eclipse.lsp4j.*;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,101 +48,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient {
-
-    private static final int informationType = CompilerTask.translateCategory(CompilerMessageCategory.INFORMATION);
-
-    private final class GutterActions implements EditorGutterAction {
-        public GutterActions(Diagnostic diag, List<? extends Either<Command, CodeAction>> lenses) {
-            this.lenses = new LinkedHashMap<>();
-            int line = diag.getRange().getStart().getLine();
-            lenses.forEach(cl -> this.lenses.put(line, cl));
-        }
-
-        private final Map<Integer, Either<Command, CodeAction>> lenses;
-
-        @Override
-        public void doAction(int i) {
-            Either<Command, CodeAction> c = lenses.get(i);
-            Util.doAction(c, project, server);
-        }
-
-        @Override
-        public Cursor getCursor(int i) {
-            return Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-        }
-    }
-
-    private final class GutterAnnotations implements TextAnnotationGutterProvider {
-
-        public GutterAnnotations(Diagnostic diag, List<? extends Either<Command, CodeAction>> lenses) {
-            this.lenses = new LinkedHashMap<>();
-            int line = diag.getRange().getStart().getLine();
-            lenses.forEach(cl -> this.lenses.put(line, cl.isLeft() ? cl.getLeft() : cl.getRight().getCommand()));
-        }
-
-        private final Map<Integer, Command> lenses;
-
-        @Nullable
-        @Override
-        public String getToolTip(int i, Editor editor) {
-            if (lenses.containsKey(i)) {
-                StringBuffer msg = new StringBuffer(lenses.get(i).getCommand());
-                if (lenses.get(i).getArguments() != null) {
-                    msg.append("(");
-                    lenses.get(i).getArguments().forEach(s -> {
-                        msg.append(s.toString()).append(" ");
-                    });
-                    msg.append(")");
-                }
-                return msg.toString();
-            } else {
-                return null;
-            }
-        }
-
-        @Nullable
-        @Override
-        public String getLineText(int i, Editor editor) {
-            return lenses.containsKey(i) ? lenses.get(i).getCommand() : null;
-        }
-
-        @Override
-        public EditorFontType getStyle(int i, Editor editor) {
-            return EditorFontType.BOLD;
-        }
-
-        @Nullable
-        @Override
-        public ColorKey getColor(int i, Editor editor) {
-            return ColorKey.createColorKey("LSP", Color.BLUE);
-        }
-
-        @Nullable
-        @Override
-        public Color getBgColor(int i, Editor editor) {
-            return editor.getColorsScheme().getDefaultBackground();
-        }
-
-        @Override
-        public List<AnAction> getPopupActions(int i, Editor editor) {
-            return Collections.singletonList(new AnAction() {
-                @Override
-                public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-                    Command c = lenses.get(i);
-                    ExecuteCommandParams params = new ExecuteCommandParams();
-                    params.setCommand(c.getCommand());
-                    params.setArguments(c.getArguments());
-                    server.getWorkspaceService().executeCommand(params);
-                }
-            });
-        }
-
-        @Override
-        public void gutterClosed() {
-
-        }
-    }
-
     private final Project project;
     private LanguageServer server;
     private final ProblemsView pv;
@@ -159,8 +61,14 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 
     public LanguageClient(Project project) {
         this.project = project;
-        this.pv = ProblemsView.SERVICE.getInstance(project);
         this.intentions = project.getComponent(QuickFixes.class);
+        ProblemsView hack;
+        try {
+            hack = ProblemsView.SERVICE.getInstance(project);
+        } catch (NoClassDefFoundError e) {
+            hack = null;
+        }
+        this.pv = hack;
     }
 
     public void connect(LanguageServer server) {
@@ -234,55 +142,57 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         Document doc = Util.getDocument(vf);
         List<Diagnostic> diagnostics = publishedDiagnostics.get(vf);
 
-        UUID uuid =  UUID.randomUUID();
-        pv.clearOldMessages(null, uuid);
-        diagnostics.forEach((diag) -> {
-            Range rng = diag.getRange();
-            Position start = rng.getStart();
-            int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
-            Navigatable x = new OpenFileDescriptor(project, vf, startOffset);
-            CompilerMessage msg = new CompilerMessage() {
-                @NotNull
-                @Override
-                public CompilerMessageCategory getCategory() {
-                    DiagnosticSeverity severity=diag.getSeverity();
-                    if(severity.equals(DiagnosticSeverity.Error))
-                        return CompilerMessageCategory.ERROR;
-                    if(severity.equals(DiagnosticSeverity.Warning))
-                        return CompilerMessageCategory.WARNING;
-                    return CompilerMessageCategory.INFORMATION;
-                }
+        if (pv != null) {
+            UUID uuid = UUID.randomUUID();
+            pv.clearOldMessages(null, uuid);
+            diagnostics.forEach((diag) -> {
+                Range rng = diag.getRange();
+                Position start = rng.getStart();
+                int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
+                Navigatable x = new OpenFileDescriptor(project, vf, startOffset);
+                CompilerMessage msg = new CompilerMessage() {
+                    @NotNull
+                    @Override
+                    public CompilerMessageCategory getCategory() {
+                        DiagnosticSeverity severity = diag.getSeverity();
+                        if (severity.equals(DiagnosticSeverity.Error))
+                            return CompilerMessageCategory.ERROR;
+                        if (severity.equals(DiagnosticSeverity.Warning))
+                            return CompilerMessageCategory.WARNING;
+                        return CompilerMessageCategory.INFORMATION;
+                    }
 
-                @Override
-                public String getMessage() {
-                    if(diag.getSource()!=null)
-                        return diag.getMessage()+" ["+diag.getSource()+"]";
-                    return diag.getMessage();
-                }
+                    @Override
+                    public String getMessage() {
+                        if (diag.getSource() != null)
+                            return diag.getMessage() + " [" + diag.getSource() + "]";
+                        return diag.getMessage();
+                    }
 
-                @Nullable
-                @Override
-                public Navigatable getNavigatable() {
-                    return x;
-                }
+                    @Nullable
+                    @Override
+                    public Navigatable getNavigatable() {
+                        return x;
+                    }
 
-                @Override
-                public VirtualFile getVirtualFile() {
-                    return vf;
-                }
+                    @Override
+                    public VirtualFile getVirtualFile() {
+                        return vf;
+                    }
 
-                @Override
-                public String getExportTextPrefix() {
-                    return null;
-                }
+                    @Override
+                    public String getExportTextPrefix() {
+                        return null;
+                    }
 
-                @Override
-                public String getRenderTextPrefix() {
-                    return "";
-                }
-            };
-            pv.addMessage(msg, uuid);
-        });
+                    @Override
+                    public String getRenderTextPrefix() {
+                        return "";
+                    }
+                };
+                pv.addMessage(msg, uuid);
+            });
+        }
 
         intentions.clear();
         diagnostics.forEach((diag) -> intentions.addDiagnostic(doc, vf.getUrl(), diag, server));
@@ -305,7 +215,7 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
     private Diagnostic currHintDiag = null;
 
     private void showMarkup(Diagnostic diag, Editor editor, Document doc) {
-        int flags =0;// HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
+        int flags = 0;// HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
 
         final TextAttributes attr = new TextAttributes();
         attr.setEffectColor(JBColor.RED);
@@ -396,9 +306,11 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                         currentHint.addListener(new JBPopupListener() {
                             @Override
                             public void onClosed(@NotNull LightweightWindowEvent event) {
-                                currentHint.dispose();
-                                currentHint = null;
-                                currHintDiag = null;
+                                if (currentHint != null) {
+                                    currentHint.dispose();
+                                    currentHint = null;
+                                    currHintDiag = null;
+                                }
                             }
                         });
                     }

@@ -22,12 +22,14 @@ public class Configuration implements Configurable {
     public static final String ARGS = "java.args";
     public static final String DIR = "java.dir";
     public static final String JVM = "java.jvm";
+    public static final String JVM_ARGS = "java.jvm.args";
     private JTextField jarField;
     private JTextField cpField;
     private JTextField mainField;
     private JTextField argsField;
     private JTextField dirField;
     private JTextField jvmField;
+    private JTextField jvmArgsField;
 
     private boolean isModified = false;
 
@@ -46,13 +48,14 @@ public class Configuration implements Configurable {
         String mainClass = pc.getValue(MAIN, "");
         String args = pc.getValue(ARGS, "");
         String dir = pc.getValue(DIR, "");
+        String jvmArgs = pc.getValue(JVM_ARGS, "");
 
         String javaHome = System.getProperty("java.home");
         File javaPath = new File(javaHome, "bin/java");
         String jvm = pc.getValue(JVM, javaPath.getAbsolutePath());
 
         JPanel p = new JPanel();
-        p.setLayout(new GridLayout(14, 1));
+        p.setLayout(new GridLayout(16, 1));
 
         JComponent jarText = new JLabel("JAR file path");
         p.add(jarText);
@@ -132,6 +135,13 @@ public class Configuration implements Configurable {
         jvmField.getDocument().addDocumentListener(dl);
         p.add(jvmField);
 
+        JComponent jvmArgText = new JLabel("JVM arguments");
+        p.add(jvmArgText);
+
+        jvmArgsField = new JTextField(jvmArgs, 50);
+        jvmArgsField.getDocument().addDocumentListener(dl);
+        p.add(jvmArgsField);
+
         return p;
     }
 
@@ -149,7 +159,8 @@ public class Configuration implements Configurable {
         pc.setValue(ARGS, argsField.getText());
         pc.setValue(DIR, dirField.getText());
         pc.setValue(JVM, jvmField.getText());
+        pc.setValue(JVM_ARGS, jvmArgsField.getText());
         isModified = false;
-        Launcher.reload();
+        //Launcher.reload();
     }
 }

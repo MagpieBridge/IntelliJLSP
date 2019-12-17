@@ -18,6 +18,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.*;
 
@@ -54,8 +56,8 @@ public class QuickFixes extends AbstractIntentionAction {
         }
     }
 
-    private static final Map<Document, NavigableMap<Integer, IPopupChooserBuilder<QuickFix>>> lowerBound = new LinkedHashMap<>();
-    private static final Map<Document, NavigableMap<Integer, IPopupChooserBuilder<QuickFix>>> upperBound = new LinkedHashMap<>();
+    private static final Map<Document, NavigableMap<Integer, List<QuickFix>>> lowerBound = new LinkedHashMap<>();
+    private static final Map<Document, NavigableMap<Integer, List<QuickFix>>> upperBound = new LinkedHashMap<>();
 
     @Nls(capitalization = Nls.Capitalization.Sentence)
     @NotNull
@@ -79,13 +81,12 @@ public class QuickFixes extends AbstractIntentionAction {
         context.setDiagnostics(Collections.singletonList(diag));
         fixes.setContext(context);
         server.getTextDocumentService().codeAction(fixes).thenAccept(actions -> {
-            addDiagnostic(doc, diag, server, actions);
+            addDiagnostic(doc, diag.getRange(), server, actions);
         });
     }
 
-    public void addDiagnostic(Document doc, Diagnostic diag, LanguageServer server, List<? extends Either<Command, CodeAction>> lenses) {
-       Range range = diag.getRange();
-       Position start = range.getStart();
+    private void addDiagnostic(Document doc, Range range, LanguageServer server, List<? extends Either<Command, CodeAction>> lenses) {
+        Position start = range.getStart();
        int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
        Position end = range.getEnd();
        int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
@@ -95,12 +96,7 @@ public class QuickFixes extends AbstractIntentionAction {
            fixes.add(new QuickFix(c, server));
        });
 
-        IPopupChooserBuilder<QuickFix> popup = JBPopupFactory.getInstance().createPopupChooserBuilder(fixes);
-
-        if (! lowerBound.containsKey(doc)) { lowerBound.put(doc, new TreeMap<>()); }
-        lowerBound.get(doc).put(startOffset, popup);
-        if (! upperBound.containsKey(doc)) { upperBound.put(doc, new TreeMap<>()); }
-        upperBound.get(doc).put(endOffset, popup);
+       recordAction(doc, startOffset, endOffset, fixes);
     }
 
     public void addFix(@NotNull Document doc, @NotNull Range range, QuickFix... newText) {
@@ -109,15 +105,9 @@ public class QuickFixes extends AbstractIntentionAction {
         Position end = range.getEnd();
         int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
 
-        Logger.getInstance(getClass()).info("fix from " + startOffset + " to " + endOffset + " of " + doc + ": " + newText);
-        Logger.getInstance(getClass()).info("this: " + this);
-
         IPopupChooserBuilder<QuickFix> popup = JBPopupFactory.getInstance().createPopupChooserBuilder(Arrays.asList(newText));
 
-        if (! lowerBound.containsKey(doc)) { lowerBound.put(doc, new TreeMap<>()); }
-        lowerBound.get(doc).put(startOffset, popup);
-        if (! upperBound.containsKey(doc)) { upperBound.put(doc, new TreeMap<>()); }
-        upperBound.get(doc).put(endOffset, popup);
+        recordAction(doc, startOffset, endOffset, Arrays.asList(newText));
     }
 
     public void addCodeActions(Document doc, Range range, LanguageServer server, List<? extends Either<Command, CodeAction>> actions) {
@@ -130,34 +120,53 @@ public class QuickFixes extends AbstractIntentionAction {
         actions.forEach(c ->  {
             fixes.add(new QuickFix(c, server));
         });
-        IPopupChooserBuilder<QuickFix> popup = JBPopupFactory.getInstance().createPopupChooserBuilder(fixes);
 
-        if (! lowerBound.containsKey(doc)) { lowerBound.put(doc, new TreeMap<>()); }
-        lowerBound.get(doc).put(startOffset, popup);
-        if (! upperBound.containsKey(doc)) { upperBound.put(doc, new TreeMap<>()); }
-        upperBound.get(doc).put(endOffset, popup);
+        recordAction(doc, startOffset, endOffset, (List<QuickFix>) fixes);
+    }
+
+    private void recordAction(Document doc, int startOffset, int endOffset, List<QuickFix> fixes) {
+        if (!lowerBound.containsKey(doc)) {
+            lowerBound.put(doc, new TreeMap<>());
+        }
+        lowerBound.get(doc).put(startOffset, fixes);
+        if (!upperBound.containsKey(doc)) {
+            upperBound.put(doc, new TreeMap<>());
+        }
+        upperBound.get(doc).put(endOffset, fixes);
+
+        Logger.getInstance(getClass()).info("recordAction: fix from " + startOffset + " to " + endOffset + ": " + fixes);
+        logStackTrace("recordAction: ");
     }
 
     @Nullable
-    private Map.Entry<Integer,IPopupChooserBuilder<QuickFix>>[] getPopup(@NotNull Editor editor) {
+    private Map.Entry<Integer,List<QuickFix>>[] getPopup(@NotNull Editor editor) {
         Document doc = editor.getDocument();
         int offset = editor.getCaretModel().getOffset();
 
-        Logger.getInstance(getClass()).info("looking at " + offset + " of " + doc);
-        Logger.getInstance(getClass()).info( lowerBound.toString() );
-        Logger.getInstance(getClass()).info("this: " + this);
+        Logger.getInstance(getClass()).info("getPopup: looking at " + offset + " of " + doc);
 
         if (lowerBound.containsKey(doc) && lowerBound.get(doc).floorEntry(offset) != null) {
             if (upperBound.get(doc).ceilingEntry(offset) != null) {
-                Map.Entry<Integer,IPopupChooserBuilder<QuickFix>> l = lowerBound.get(doc).floorEntry(offset);
-                Map.Entry<Integer,IPopupChooserBuilder<QuickFix>> u = upperBound.get(doc).ceilingEntry(offset);
+                Map.Entry<Integer,List<QuickFix>> l = lowerBound.get(doc).floorEntry(offset);
+                Map.Entry<Integer,List<QuickFix>> u = upperBound.get(doc).ceilingEntry(offset);
                 if (l.getValue() == u.getValue()) {
+                    String nm = "getPopup: ";
+                    Logger.getInstance(getClass()).info(nm + "found popup at " + u.getKey() + " " + l.getKey());
+                    logStackTrace(nm);
                     return new Map.Entry[]{l, u};
                 }
             }
         }
 
         return null;
+    }
+
+    private void logStackTrace(String nm) {
+        Throwable x = new Throwable();
+        x.fillInStackTrace();
+        StringWriter w = new StringWriter();
+        x.printStackTrace(new PrintWriter(w));
+        Logger.getInstance(getClass()).info( nm + w.toString());
     }
 
     @Override
@@ -167,12 +176,16 @@ public class QuickFixes extends AbstractIntentionAction {
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile psiFile) throws IncorrectOperationException {
-        Map.Entry<Integer,IPopupChooserBuilder<QuickFix>>[] pes = getPopup(editor);
+        Map.Entry<Integer,List<QuickFix>>[] pes = getPopup(editor);
         assert pes != null;
-        IPopupChooserBuilder<QuickFix> pp = pes[0].getValue();
+        List<QuickFix> fixes = pes[0].getValue();
 
-         pp.setItemChosenCallback(s -> WriteCommandAction.runWriteCommandAction(project, () -> s.act(project)));
+        Logger.getInstance(getClass()).info("invoke: using fixes " + fixes);
 
-         pp.createPopup().showInScreenCoordinates(editor.getComponent(), MouseInfo.getPointerInfo().getLocation());
+        IPopupChooserBuilder<QuickFix> pp = JBPopupFactory.getInstance().createPopupChooserBuilder(fixes);
+        pp.setItemChosenCallback(s -> WriteCommandAction.runWriteCommandAction(project, () -> s.act(project)));
+
+        pp.createPopup().showInScreenCoordinates(editor.getComponent(), MouseInfo.getPointerInfo().getLocation());
+
       }
 }

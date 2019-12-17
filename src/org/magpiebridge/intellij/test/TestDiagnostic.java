@@ -46,9 +46,11 @@ public class TestDiagnostic extends AnAction {
         relr.setStart(relp);
         relr.setEnd(relp);
         relloc.setRange(relr);
+        relloc.setUri(editor.getFile().getCanonicalPath());
         rel.setLocation(relloc);
         rel.setMessage("some message");
         diag.setRelatedInformation(Collections.singletonList(rel));
+        diag.setSeverity(DiagnosticSeverity.Error);
         params.setDiagnostics(Collections.singletonList(diag));
 
         lc.publishDiagnostics(params);

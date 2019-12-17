@@ -7,8 +7,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="IntelliJ IDEA Community Edition IC-201.SNAPSHOT" jdkType="IDEA JDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="org.eclipse.lsp4j:org.eclipse.lsp4j:0.6.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="org.eclipse.lsp4j:org.eclipse.lsp4j:0.8.1" level="project" />
+    <orderEntry type="library" name="commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="net.sf.meka:meka:1.9.2" level="project" />
+    <orderEntry type="library" name="com.atlassian.commonmark:commonmark:0.13.1" level="project" />
+    <orderEntry type="library" name="magpiebridge:magpiebridge:0.0.1-SNAPSHOT" level="project" />
   </component>
 </module>

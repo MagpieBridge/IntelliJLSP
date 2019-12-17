@@ -2,7 +2,6 @@ package org.magpiebridge.intellij.plugin;
 
 import com.intellij.AppTopics;
 import com.intellij.codeInsight.hint.HintManager;
-import com.intellij.codeInsight.hint.HintManagerImpl;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -18,10 +17,19 @@ import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.ui.popup.JBPopupListener;
+import com.intellij.openapi.ui.popup.LightweightWindowEvent;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.LightweightHint;
+import com.intellij.ui.awt.RelativePoint;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
+import magpiebridge.core.CodeActionCommand;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -31,15 +39,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import java.awt.Color;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.net.URL;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Service {
+
+    Balloon currentHint;
+    String currentHintText;
 
     private final int flags = HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
 
@@ -53,11 +67,13 @@ public class Service {
 
         @Override
         public void doAction(int i) {
-            Command c = lenses.get(i).getCommand();
-            ExecuteCommandParams params = new ExecuteCommandParams();
-            params.setCommand(c.getCommand());
-            params.setArguments(c.getArguments());
-            server.getWorkspaceService().executeCommand(params);
+            if (lenses.get(i) != null) {
+                Command c = lenses.get(i).getCommand();
+                ExecuteCommandParams params = new ExecuteCommandParams();
+                params.setCommand(c.getCommand());
+                params.setArguments(c.getArguments());
+                server.getWorkspaceService().executeCommand(params);
+            }
         }
 
         @Override
@@ -79,11 +95,14 @@ public class Service {
         @Override
         public String getToolTip(int i, Editor editor) {
             if (lenses.containsKey(i)) {
-                StringBuffer msg = new StringBuffer(lenses.get(i).getCommand().getCommand());
+                final Command cmd = lenses.get(i).getCommand();
+                StringBuffer msg = new StringBuffer(cmd.getCommand());
                 msg.append("(");
-                lenses.get(i).getCommand().getArguments().forEach(s -> {
-                    msg.append(s.toString()).append(" ");
-                });
+                if (cmd.getArguments() != null) {
+                    cmd.getArguments().forEach(s -> {
+                        msg.append(s.toString()).append(" ");
+                    });
+                }
                 msg.append(")");
                 return msg.toString();
             } else {
@@ -94,7 +113,7 @@ public class Service {
         @Nullable
         @Override
         public String getLineText(int i, Editor editor) {
-            return lenses.containsKey(i)? lenses.get(i).getCommand().getCommand(): null;
+            return lenses.containsKey(i) ? lenses.get(i).getCommand().getTitle() : null;
         }
 
         @Override
@@ -124,7 +143,7 @@ public class Service {
                     params.setCommand(c.getCommand());
                     params.setArguments(c.getArguments());
                     server.getWorkspaceService().executeCommand(params);
-                 }
+                }
             });
         }
 
@@ -132,200 +151,227 @@ public class Service {
         public void gutterClosed() {
 
         }
-    };
+    }
 
     private final LanguageServer server;
 
     private final Project project;
-    private  QuickFixes codeActions;
+    private QuickFixes codeActions;
+    private Inlays codeLenses;
 
     public Service(Project project, LanguageServer server, LanguageClient lc) {
         this.project = project;
         this.server = server;
         this.codeActions = project.getComponent(QuickFixes.class);
+        this.codeLenses = project.getComponent(Inlays.class);
 
         if (server instanceof LanguageClientAware) {
-            ((LanguageClientAware)server).connect(lc);
+            ((LanguageClientAware) server).connect(lc);
         }
 
         String rootPath = project.getBasePath();
         InitializeParams init = new InitializeParams();
-        init.setRootUri(Util.fixUrl(rootPath.startsWith("/")? "file:" + rootPath: "file:///" + rootPath));
+        init.setRootUri(Util.fixUrl(rootPath.startsWith("/") ? "file:" + rootPath : "file:///" + rootPath));
         init.setTrace("verbose");
-        server.initialize(init).thenAccept(ir -> {
-            assert ir.getCapabilities().getCodeActionProvider().getLeft();
 
-            InitializedParams ip = new InitializedParams();
-            server.initialized(ip);
-
-            MessageBus bus = project.getMessageBus();
-            MessageBusConnection busStop = bus.connect();
-
-            busStop.subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileDocumentManagerListener() {
-                @Override
-                public void beforeDocumentSaving(@NotNull Document document) {
-                        VirtualFile file = FileDocumentManager.getInstance().getFile(document);
-                        DidSaveTextDocumentParams params = new DidSaveTextDocumentParams();
-                        TextDocumentIdentifier doc = new TextDocumentIdentifier();
-                        doc.setUri(file.getUrl());
-                        params.setText(document.getText());
-                        params.setTextDocument(doc);
-                        server.getTextDocumentService().didSave(params);
-                  }
-
-                @Override
-                public void fileContentReloaded(@NotNull VirtualFile file, @NotNull Document document) {
-
-                }
-
-                @Override
-                public void fileContentLoaded(@NotNull VirtualFile file, @NotNull Document document) {
-
-                }
-            });
-
-            busStop.subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
-
-                private void open(@NotNull VirtualFile file) {
-                    Document intelliJDoc = FileDocumentManager.getInstance().getDocument(file);
-                    assert intelliJDoc != null;
-
-                    DidOpenTextDocumentParams params = new DidOpenTextDocumentParams();
-                        TextDocumentItem doc = new TextDocumentItem();
-
-                        doc.setUri(Util.fixUrl(file.getUrl()));
-
-                        doc.setLanguageId(file.getExtension());
-                        doc.setText(intelliJDoc.getText());
-                        params.setTextDocument(doc);
-
-                        server.getTextDocumentService().didOpen(params);
-
-                        CodeLensParams clp = new CodeLensParams();
-                        TextDocumentIdentifier tdi = new TextDocumentIdentifier();
-                        tdi.setUri(Util.fixUrl(file.getUrl()));
-                        clp.setTextDocument(tdi);
-                        server.getTextDocumentService().codeLens(clp).thenAccept(cls -> {
-                            ApplicationManager.getApplication().runReadAction(() -> {
-                                GutterAnnotations gutter = new GutterAnnotations(cls);
-                                GutterActions actions = new GutterActions(cls);
-                                for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
-                                    e.getGutter().registerTextAnnotation(gutter, actions);
-                                }
-                            });
-                        });
-
-                    /*
-                    CodeLensParams clp = new CodeLensParams();
-                    server.getTextDocumentService().codeLens(clp).thenAccept(cls -> {
-                        cls.forEach(cl -> {
-                            Range clr = cl.getRange();
-                            Position clpos = clr.getEnd();
-                            for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
-                                 e.getInlayModel().addInlineElement(
-                                        intelliJDoc.getLineStartOffset(clpos.getLine()) + clpos.getCharacter(),
-                                        new EditorCustomElementRenderer() {
-                                            @Override
-                                            public int calcWidthInPixels(@NotNull Inlay inlay) {
-                                                return 35;
-                                            }
-
-                                            @Override
-                                            public int calcHeightInPixels(@NotNull Inlay inlay) {
-                                                return 20;
-                                            }
-
-                                            @Override
-                                            public void paint(@NotNull Inlay inlay, @NotNull Graphics g, @NotNull Rectangle targetRegion, @NotNull TextAttributes textAttributes) {
-                                                Editor editor = inlay.getEditor();
-                                                g.setColor(JBColor.GRAY);
-                                                g.drawString(cl.getCommand().getTitle(), targetRegion.x, targetRegion.y + targetRegion.height);
-                                            }
-                                        });
-                            };
-                         });
-                    });
-                    */
-
-                    for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
-                        e.addEditorMouseMotionListener(new EditorMouseMotionListener() {
-                            @Override
-                            public void mouseMoved(@NotNull EditorMouseEvent ev) {
-                                if (ev.getArea().equals(EditorMouseEventArea.EDITING_AREA)) {
-                                    TextDocumentPositionParams pos = new TextDocumentPositionParams();
-                                    Position mp = new Position();
-                                    int offset = e.logicalPositionToOffset(e.xyToLogicalPosition(ev.getMouseEvent().getPoint()));
-                                    LogicalPosition logicalPos = e.offsetToLogicalPosition(offset);
-                                    int line = intelliJDoc.getLineNumber(offset);
-                                    int col = offset - intelliJDoc.getLineStartOffset(line);
-                                    mp.setLine(line);
-                                    mp.setCharacter(col);
-                                    pos.setPosition(mp);
-                                    TextDocumentIdentifier id = new TextDocumentIdentifier();
-                                    String uri= Util.fixUrl(file.getUrl());
-                                    id.setUri(uri);
-                                    pos.setTextDocument(id);
-                                    CodeActionParams codeActionParams = new CodeActionParams();
-                                    Range range =new Range(mp, mp);
-                                    codeActionParams.setRange(range);
-                                    codeActionParams.setTextDocument(id);
-                                    codeActionParams.setContext(new CodeActionContext(new ArrayList<Diagnostic>()));
-                                    server.getTextDocumentService().codeAction(codeActionParams).thenAccept(actions->{
-                                        if(actions.size()>=0) {
-                                            codeActions.addCodeActions(Util.getDocument(file), range, server, actions);
-                                        }
-                                    });
-
-
-                                    server.getTextDocumentService().hover(pos).thenAccept(h -> {
-                                        if (h != null) {
-                                            String text = "";
-                                            if (h.getContents().isLeft()) {
-                                                for (Either<String, MarkedString> str : h.getContents().getLeft()) {
-                                                    if (str.isRight()) {
-                                                        MarkedString ms = str.getRight();
-                                                        text += ms;
-                                                    } else {
-                                                        text += str.getLeft();
-                                                    }
-                                                }
-                                            } else {
-                                                MarkupContent mc = h.getContents().getRight();
-                                                text += mc.getValue();
-                                            }
-                                            LightweightHint hint = new LightweightHint(new JLabel(text));
-                                            Point p = HintManagerImpl.getHintPosition(hint, e, logicalPos, HintManager.ABOVE);
-                                            HintManagerImpl.getInstanceImpl().showEditorHint(hint, e, p, flags, -1, true,
-                                                    HintManagerImpl.createHintHint(e, p, hint,
-                                                            HintManager.ABOVE).setContentActive(true));
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
-
-                    if (lc instanceof org.magpiebridge.intellij.client.LanguageClient) {
-                        ((org.magpiebridge.intellij.client.LanguageClient) lc).showDiagnostics(file);
-                    }
-                }
-
-                @Override
-                public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-                    open(file);
-                }
-
-                @Override
-                public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-
-                }
-            });
+        ClientCapabilities cap = init.getCapabilities();
+        if (cap == null) {
+            cap = new ClientCapabilities();
+            init.setCapabilities(cap);
         }
 
-        );
+        TextDocumentClientCapabilities txt = cap.getTextDocument();
+        if (txt == null) {
+            txt = new TextDocumentClientCapabilities();
+            cap.setTextDocument(txt);
+        }
+
+        HoverCapabilities hover = new HoverCapabilities();
+        hover.setContentFormat(Arrays.asList(MarkupKind.MARKDOWN));
+        txt.setHover(hover);
+
+        server.initialize(init).thenAccept(ir -> {
+                    InitializedParams ip = new InitializedParams();
+                    server.initialized(ip);
+
+                    MessageBus bus = project.getMessageBus();
+                    MessageBusConnection busStop = bus.connect();
+
+                    busStop.subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileDocumentManagerListener() {
+                        @Override
+                        public void beforeDocumentSaving(@NotNull Document document) {
+                            VirtualFile file = FileDocumentManager.getInstance().getFile(document);
+                            DidSaveTextDocumentParams params = new DidSaveTextDocumentParams();
+                            TextDocumentIdentifier doc = new TextDocumentIdentifier();
+                            doc.setUri(file.getUrl());
+                            params.setText(document.getText());
+                            params.setTextDocument(doc);
+                            server.getTextDocumentService().didSave(params);
+                        }
+
+                        @Override
+                        public void fileContentReloaded(@NotNull VirtualFile file, @NotNull Document document) {
+
+                        }
+
+                        @Override
+                        public void fileContentLoaded(@NotNull VirtualFile file, @NotNull Document document) {
+
+                        }
+                    });
+
+                    busStop.subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
+
+                        private void open(@NotNull VirtualFile file) {
+                            Document intelliJDoc = FileDocumentManager.getInstance().getDocument(file);
+                            assert intelliJDoc != null;
+
+                            DidOpenTextDocumentParams params = new DidOpenTextDocumentParams();
+                            TextDocumentItem doc = new TextDocumentItem();
+
+                            doc.setUri(Util.fixUrl(file.getUrl()));
+
+                            doc.setLanguageId(file.getExtension());
+                            doc.setText(intelliJDoc.getText());
+                            params.setTextDocument(doc);
+
+                            server.getTextDocumentService().didOpen(params);
+
+                            CodeLensParams clp = new CodeLensParams();
+                            TextDocumentIdentifier tdi = new TextDocumentIdentifier();
+                            tdi.setUri(Util.fixUrl(file.getUrl()));
+                            clp.setTextDocument(tdi);
+                            server.getTextDocumentService().codeLens(clp).thenAccept(cls -> {
+
+                                cls.forEach(cl -> {
+                                    codeLenses.addLens(intelliJDoc, cl, server);
+                                });
+
+                                ApplicationManager.getApplication().runReadAction(() -> {
+                                    GutterAnnotations gutter = new GutterAnnotations(cls);
+                                    GutterActions actions = new GutterActions(cls);
+                                    for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
+                                        e.getGutter().registerTextAnnotation(gutter, actions);
+                                    }
+                                });
+                            });
+
+                            for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
+                                e.addEditorMouseMotionListener(new EditorMouseMotionListener() {
+                                    @Override
+                                    public void mouseMoved(@NotNull EditorMouseEvent e) {
+                                        handleEvent(e);
+                                    }
+
+                                    @Override
+                                    public void mouseDragged(@NotNull EditorMouseEvent e) {
+                                        handleEvent(e);
+                                    }
+
+                                    private void handleEvent(@NotNull EditorMouseEvent ev) {
+                                        if (ev.getArea().equals(EditorMouseEventArea.EDITING_AREA)) {
+                                            TextDocumentPositionParams pos = new TextDocumentPositionParams();
+                                            Position mp = new Position();
+                                            int offset = e.logicalPositionToOffset(e.xyToLogicalPosition(ev.getMouseEvent().getPoint()));
+                                            int line = intelliJDoc.getLineNumber(offset);
+                                            int col = offset - intelliJDoc.getLineStartOffset(line);
+                                            mp.setLine(line);
+                                            mp.setCharacter(col);
+                                            pos.setPosition(mp);
+                                            TextDocumentIdentifier id = new TextDocumentIdentifier();
+                                            String uri = Util.fixUrl(file.getUrl());
+                                            id.setUri(uri);
+                                            pos.setTextDocument(id);
+
+                                            try {
+                                                Hover h = server.getTextDocumentService().hover(pos).get(5000, TimeUnit.MILLISECONDS);
+                                                String text = "";
+                                                if (h != null) {
+                                                    if (h.getContents().isLeft()) {
+                                                        for (Either<String, MarkedString> str : h.getContents().getLeft()) {
+                                                            if (str.isRight()) {
+                                                                MarkedString ms = str.getRight();
+                                                                text += ms.getValue();
+                                                            } else {
+                                                                text += str.getLeft();
+                                                            }
+                                                        }
+                                                    } else {
+                                                        MarkupContent mc = h.getContents().getRight();
+                                                        text += mc.getValue();
+                                                    }
+
+                                                    Parser parser = Parser.builder().build();
+                                                    Node document = parser.parse(text);
+                                                    HtmlRenderer renderer = HtmlRenderer.builder().build();
+                                                    String html = renderer.render(document);
+
+                                                    JEditorPane render = new JEditorPane();
+                                                    render.setContentType("text/html");
+                                                    render.setText(html);
+
+                                                    if (!html.equals(currentHintText)) {
+                                                        currentHintText = html;
+
+                                                        if (currentHint != null) {
+                                                            currentHint.dispose();
+                                                        }
+
+                                                        currentHint = JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(html, MessageType.INFO, new HyperlinkListener() {
+                                                            @Override
+                                                            public void hyperlinkUpdate(HyperlinkEvent e) {
+                                                                URL url = e.getURL();
+                                                                if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+                                                                    ExecuteCommandParams cmd = new ExecuteCommandParams();
+                                                                    cmd.setCommand(CodeActionCommand.openURL.name());
+                                                                    cmd.setArguments(Arrays.asList(url.toExternalForm()));
+                                                                    server.getWorkspaceService().executeCommand(cmd);
+                                                                }
+                                                            }
+                                                        }).createBalloon();
+
+                                                        currentHint.show(new RelativePoint(ev.getMouseEvent()), Balloon.Position.above);
+                                                        currentHint.addListener(new JBPopupListener() {
+                                                            @Override
+                                                            public void onClosed(@NotNull LightweightWindowEvent event) {
+                                                                if (currentHint != null) {
+                                                                    currentHint.dispose();
+                                                                    currentHint = null;
+                                                                    currentHintText = null;
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
+                            if (lc instanceof org.magpiebridge.intellij.client.LanguageClient) {
+                                ((org.magpiebridge.intellij.client.LanguageClient) lc).showDiagnostics(file);
+                            }
+                        }
+
+                        @Override
+                        public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+                            open(file);
+                        }
+
+                        @Override
+                        public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+
+                        }
+                    });
+                }
+
+        ).join();
     }
 
-    public void shutDown(Runnable andThen){
+    public void shutDown(Runnable andThen) {
         server.shutdown().thenRunAsync(andThen);
     }
 

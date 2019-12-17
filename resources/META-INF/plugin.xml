@@ -27,9 +27,14 @@
       <className>org.magpiebridge.intellij.plugin.QuickFixes</className>
       <category>SDK Intentions</category>
     </intentionAction>
-   </extensions>
+    <codeInsight.inlayProvider language="JAVA" implementationClass="org.magpiebridge.intellij.plugin.Inlays"/>
+    <codeInsight.inlayProvider language="Python" implementationClass="org.magpiebridge.intellij.plugin.Inlays"/>
+  </extensions>
 
   <project-components>
+    <component>
+      <implementation-class>org.magpiebridge.intellij.plugin.Inlays</implementation-class>
+    </component>
     <component>
       <implementation-class>org.magpiebridge.intellij.plugin.QuickFixes</implementation-class>
     </component>
@@ -39,8 +44,8 @@
   </project-components>
 
   <actions>
-    <!-- Add your actions here -->
-    <!-- group id="magpiebridge.intellij.tests.Tests" text="Tests for LSP support" popup="true">
+    <!-- Add your actions here
+    <group id="magpiebridge.intellij.tests.Tests" text="Tests for LSP support" popup="true">
       <add-to-group group-id="ToolsMenu" anchor="last"/>
       <action id="TestMessages" class="org.magpiebridge.intellij.test.TestMessages" text="TestMessages"
               description="Simple test of messages for LSP">

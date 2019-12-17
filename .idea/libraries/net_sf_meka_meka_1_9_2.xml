@@ -1,0 +1,67 @@
+<component name="libraryTable">
+  <library name="net.sf.meka:meka:1.9.2" type="repository">
+    <properties maven-id="net.sf.meka:meka:1.9.2" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/sf/meka/meka/1.9.2/meka-1.9.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/nz/ac/waikato/cms/weka/weka-dev/3.9.2/weka-dev-3.9.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/nz/ac/waikato/cms/weka/thirdparty/java-cup-11b/2015.03.26/java-cup-11b-2015.03.26.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/nz/ac/waikato/cms/weka/thirdparty/java-cup-11b-runtime/2015.03.26/java-cup-11b-runtime-2015.03.26.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/nz/ac/waikato/cms/weka/thirdparty/bounce/0.18/bounce-0.18.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/matrix-toolkits-java/mtj/1.0.4/mtj-1.0.4.jar!/" />
+      <root url="file://$MAVEN_REPOSITORY$/com/github/fommil/netlib/all/1.1.2/all-1.1.2.pom" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-osx-x86_64/1.1/netlib-native_ref-osx-x86_64-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/native_ref-java/1.1/native_ref-java-1.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/jniloader/1.1/jniloader-1.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-linux-x86_64/1.1/netlib-native_ref-linux-x86_64-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-linux-i686/1.1/netlib-native_ref-linux-i686-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-win-x86_64/1.1/netlib-native_ref-win-x86_64-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-win-i686/1.1/netlib-native_ref-win-i686-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-linux-armhf/1.1/netlib-native_ref-linux-armhf-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_system-osx-x86_64/1.1/netlib-native_system-osx-x86_64-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/native_system-java/1.1/native_system-java-1.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_system-linux-x86_64/1.1/netlib-native_system-linux-x86_64-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_system-linux-i686/1.1/netlib-native_system-linux-i686-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_system-linux-armhf/1.1/netlib-native_system-linux-armhf-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_system-win-x86_64/1.1/netlib-native_system-win-x86_64-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_system-win-i686/1.1/netlib-native_system-win-i686-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/net/sourceforge/f2j/arpack_combined_all/0.1/arpack_combined_all-0.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/netlib-java/netlib-java/1.1/netlib-java-1.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/core/1.1/core-1.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/net/sf/meka/thirdparty/mulan/1.4.0/mulan-1.4.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/net/sf/meka/thirdparty/mst/4.0/mst-4.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/jidesoft/jide-oss/3.6.18/jide-oss-3.6.18.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fracpete/jfilechooser-bookmarks/0.1.6/jfilechooser-bookmarks-0.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fracpete/jclipboardhelper/0.1.1/jclipboardhelper-0.1.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/gov/nist/math/jama/1.0.3/jama-1.0.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/net/sf/trove4j/trove4j/3.0.3/trove4j-3.0.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/kramerlab/bmad/2.4/bmad-2.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/kramerlab/autoencoder/0.1/autoencoder-0.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.2/scala-library-2.10.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-swing/2.10.2/scala-swing-2.10.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/scalatest/scalatest-maven-plugin/1.0-M2/scalatest-maven-plugin-1.0-M2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-plugin-api/2.0.9/maven-plugin-api-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-project/2.0.9/maven-project-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-settings/2.0.9/maven-settings-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-profile/2.0.9/maven-profile-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-model/2.0.9/maven-model-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-artifact-manager/2.0.9/maven-artifact-manager-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-repository-metadata/2.0.9/maven-repository-metadata-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/wagon/wagon-provider-api/1.0-beta-2/wagon-provider-api-1.0-beta-2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-plugin-registry/2.0.9/maven-plugin-registry-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/maven-artifact/2.0.9/maven-artifact-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/plexus/plexus-container-default/1.0-alpha-9-stable-1/plexus-container-default-1.0-alpha-9-stable-1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/junit/junit/3.8.1/junit-3.8.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/classworlds/classworlds/1.1-alpha-2/classworlds-1.1-alpha-2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/reporting/maven-reporting-api/2.0.9/maven-reporting-api-2.0.9.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/doxia/doxia-sink-api/1.0/doxia-sink-api-1.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/plexus/plexus-utils/3.0/plexus-utils-3.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/jfree/jfreechart/1.0.13/jfreechart-1.0.13.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/jfree/jcommon/1.0.16/jcommon-1.0.16.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/efficient-java-matrix-library/ejml/0.22/ejml-0.22.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/markdownj/markdownj-core/0.4/markdownj-core-0.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fracpete/multisearch-weka-package/2017.10.1/multisearch-weka-package-2017.10.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
