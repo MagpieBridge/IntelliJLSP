@@ -2,25 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="013b7a03-4af3-42b2-bda2-df133cde2e26" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/com_atlassian_commonmark_commonmark_0_13_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/commons_io_commons_io_2_6.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/magpiebridge_magpiebridge_0_0_1_SNAPSHOT.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/net_sf_meka_meka_1_9_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Actions.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Inlays.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/org_eclipse_lsp4j_org_eclipse_lsp4j_0_6_0_SNAPSHOT.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/org_eclipse_lsp4j_org_eclipse_lsp4j_0_8_1.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MagpieBridgeLSP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/MagpieBridgeLSP.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MagpieBridgeLSP.zip" beforeDir="false" afterPath="$PROJECT_DIR$/MagpieBridgeLSP.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/resources/META-INF/plugin.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Configuration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Launcher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/QuickFixes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/QuickFixes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Service.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestDiagnostic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestDiagnostic.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
