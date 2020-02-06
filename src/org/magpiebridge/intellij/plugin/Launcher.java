@@ -3,6 +3,7 @@ package org.magpiebridge.intellij.plugin;
 import com.google.common.io.ByteSink;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
+import magpiebridge.core.MagpieLanguageClient;
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
@@ -49,7 +50,7 @@ public class Launcher {
     }
 
     public static void launch(Project p) throws IOException {
-        PropertiesComponent pc = PropertiesComponent.getInstance();
+        PropertiesComponent pc = PropertiesComponent.getInstance(p);
         String jarPath = pc.getValue(Configuration.JAR);
         String cpPath = pc.getValue(Configuration.CP);
         String mainClass = pc.getValue(Configuration.MAIN);
@@ -57,6 +58,10 @@ public class Launcher {
         String dir = pc.getValue(Configuration.DIR);
         String jvm = pc.getValue(Configuration.JVM);
         String jvmArgs = pc.getValue(Configuration.JVM_ARGS);
+
+        if (mainClass == null && jarPath == null) {
+            return;
+        }
 
         ProcessBuilder proc = new ProcessBuilder();
 

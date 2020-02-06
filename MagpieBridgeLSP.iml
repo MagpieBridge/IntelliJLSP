@@ -13,6 +13,7 @@
     <orderEntry type="library" name="commons-io:commons-io:2.6" level="project" />
     <orderEntry type="library" name="net.sf.meka:meka:1.9.2" level="project" />
     <orderEntry type="library" name="com.atlassian.commonmark:commonmark:0.13.1" level="project" />
-    <orderEntry type="library" name="magpiebridge:magpiebridge:0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="magpiebridge:magpiebridge:0.0.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="org.json:json:20190722" level="project" />
   </component>
 </module>

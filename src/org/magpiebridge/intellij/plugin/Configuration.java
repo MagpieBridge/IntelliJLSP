@@ -4,6 +4,7 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,13 @@ public class Configuration implements Configurable {
 
     private boolean isModified = false;
 
+    private final Project project;
+
+    public Configuration(Project project) {
+        this.project = project;
+    }
+
+
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
@@ -42,7 +50,7 @@ public class Configuration implements Configurable {
     @Nullable
     @Override
     public JComponent createComponent() {
-        PropertiesComponent pc = PropertiesComponent.getInstance();
+        PropertiesComponent pc = PropertiesComponent.getInstance(project);
         String cpPath = pc.getValue(CP, "");
         String jarPath = pc.getValue(JAR, "");
         String mainClass = pc.getValue(MAIN, "");
@@ -152,7 +160,7 @@ public class Configuration implements Configurable {
 
     @Override
     public void apply() {
-        PropertiesComponent pc = PropertiesComponent.getInstance();
+        PropertiesComponent pc = PropertiesComponent.getInstance(project);
         pc.setValue(JAR, jarField.getText());
         pc.setValue(CP, cpField.getText());
         pc.setValue(MAIN, mainField.getText());

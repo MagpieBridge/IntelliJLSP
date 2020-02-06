@@ -2,20 +2,30 @@
 // another line to hack
 package org.magpiebridge.intellij.client;
 
+import com.intellij.codeInsight.daemon.impl.DaemonTooltipUtil;
+import com.intellij.codeInsight.daemon.impl.HighlightInfo;
+import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
+import com.intellij.codeInsight.hint.TooltipController;
+import com.intellij.codeInsight.hint.TooltipGroup;
 import com.intellij.compiler.ProblemsView;
+import com.intellij.execution.Platform;
+import com.intellij.ide.IdeTooltip;
+import com.intellij.ide.IdeTooltipManager;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.compiler.CompilerMessage;
 import com.intellij.openapi.compiler.CompilerMessageCategory;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.editor.EditorKind;
+import com.intellij.openapi.editor.*;
+import com.intellij.openapi.editor.colors.ColorKey;
+import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseEventArea;
 import com.intellij.openapi.editor.event.EditorMouseMotionListener;
@@ -23,6 +33,7 @@ import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
@@ -30,29 +41,148 @@ import com.intellij.openapi.ui.popup.JBPopupListener;
 import com.intellij.openapi.ui.popup.LightweightWindowEvent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
+import com.intellij.ui.HintHint;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.LightweightHint;
 import com.intellij.ui.awt.RelativePoint;
+import com.intellij.util.messages.MessageBus;
+import com.sun.javafx.application.PlatformImpl;
+import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.JFXPanel;
+import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.web.WebView;
+import magpiebridge.command.CodeActionCommand;
+import magpiebridge.core.MagpieLanguageClient;
 import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.magpiebridge.intellij.plugin.Inlays;
 import org.magpiebridge.intellij.plugin.QuickFixes;
+import org.magpiebridge.intellij.plugin.Service;
 import org.magpiebridge.intellij.plugin.Util;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import java.awt.Color;
 import java.awt.*;
+import java.net.URL;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient {
+public class LanguageClient implements MagpieLanguageClient {
     private final Project project;
     private LanguageServer server;
     private final ProblemsView pv;
     private final QuickFixes intentions;
     private final Map<VirtualFile, List<Diagnostic>> publishedDiagnostics = new HashMap<>();
+    private Inlays codeLenses;
+
+    private final class GutterActions implements EditorGutterAction {
+        public GutterActions(List<? extends CodeLens> lenses) {
+            this.lenses = new LinkedHashMap<>();
+            lenses.forEach(cl -> this.lenses.put(cl.getRange().getStart().getLine(), cl));
+        }
+
+        private final Map<Integer, CodeLens> lenses;
+
+        @Override
+        public void doAction(int i) {
+            if (lenses.get(i) != null) {
+                Command c = lenses.get(i).getCommand();
+                ExecuteCommandParams params = new ExecuteCommandParams();
+                params.setCommand(c.getCommand());
+                params.setArguments(c.getArguments());
+                server.getWorkspaceService().executeCommand(params);
+            }
+        }
+
+        @Override
+        public Cursor getCursor(int i) {
+            return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
+        }
+    }
+
+    private final class GutterAnnotations implements TextAnnotationGutterProvider {
+
+        public GutterAnnotations(List<? extends CodeLens> lenses) {
+            this.lenses = new LinkedHashMap<>();
+            lenses.forEach(cl -> this.lenses.put(cl.getRange().getStart().getLine(), cl));
+        }
+
+        private final Map<Integer, CodeLens> lenses;
+
+        @Nullable
+        @Override
+        public String getToolTip(int i, Editor editor) {
+            if (lenses.containsKey(i)) {
+                final Command cmd = lenses.get(i).getCommand();
+                StringBuffer msg = new StringBuffer(cmd.getCommand());
+                msg.append("(");
+                if (cmd.getArguments() != null) {
+                    cmd.getArguments().forEach(s -> {
+                        msg.append(s.toString()).append(" ");
+                    });
+                }
+                msg.append(")");
+                return msg.toString();
+            } else {
+                return null;
+            }
+        }
+
+        @Nullable
+        @Override
+        public String getLineText(int i, Editor editor) {
+            return lenses.containsKey(i) ? lenses.get(i).getCommand().getTitle() : null;
+        }
+
+        @Override
+        public EditorFontType getStyle(int i, Editor editor) {
+            return EditorFontType.BOLD;
+        }
+
+        @Nullable
+        @Override
+        public ColorKey getColor(int i, Editor editor) {
+            return ColorKey.createColorKey("LSP", Color.BLUE);
+        }
+
+        @Nullable
+        @Override
+        public Color getBgColor(int i, Editor editor) {
+            return editor.getColorsScheme().getDefaultBackground();
+        }
+
+        @Override
+        public List<AnAction> getPopupActions(int i, Editor editor) {
+            return Collections.singletonList(new AnAction() {
+                @Override
+                public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+                    Command c = lenses.get(i).getCommand();
+                    ExecuteCommandParams params = new ExecuteCommandParams();
+                    params.setCommand(c.getCommand());
+                    params.setArguments(c.getArguments());
+                    server.getWorkspaceService().executeCommand(params);
+                }
+            });
+        }
+
+        @Override
+        public void gutterClosed() {
+
+        }
+    }
 
     public LanguageClient(Project project, LanguageServer server) {
         this(project);
@@ -62,6 +192,7 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
     public LanguageClient(Project project) {
         this.project = project;
         this.intentions = project.getComponent(QuickFixes.class);
+        this.codeLenses = project.getComponent(Inlays.class);
         ProblemsView hack;
         try {
             hack = ProblemsView.SERVICE.getInstance(project);
@@ -135,6 +266,8 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         showDiagnostics(vf);
     }
 
+    private UUID myUUID = UUID.randomUUID();
+
     public void showDiagnostics(VirtualFile vf){
         if (!publishedDiagnostics.containsKey(vf)){
             return;
@@ -143,9 +276,8 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         List<Diagnostic> diagnostics = publishedDiagnostics.get(vf);
 
         if (pv != null) {
-            UUID uuid = UUID.randomUUID();
-            pv.clearOldMessages(null, uuid);
-            diagnostics.forEach((diag) -> {
+            pv.clearOldMessages(null, myUUID);
+            diagnostics.forEach(diag -> {
                 Range rng = diag.getRange();
                 Position start = rng.getStart();
                 int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
@@ -190,12 +322,12 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                         return "";
                     }
                 };
-                pv.addMessage(msg, uuid);
+                pv.addMessage(msg, myUUID);
             });
         }
 
         intentions.clear();
-        diagnostics.forEach((diag) -> intentions.addDiagnostic(doc, vf.getUrl(), diag, server));
+        diagnostics.forEach(diag -> intentions.addDiagnostic(doc, vf.getUrl(), diag, server));
 
         Editor[] editors = EditorFactory.getInstance().getEditors(doc, project);
         for (Editor editor : editors) {
@@ -203,16 +335,39 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         }
         editorListeners.clear();
 
-        diagnostics.forEach((diag) -> {
-
-            for (Editor editor : editors) {
+        for (Editor editor : editors) {
+ //           MarkupModel markup = editor.getMarkupModel();
+ //           markup.removeAllHighlighters();
+            diagnostics.forEach(diag -> {
                 showMarkup(diag, editor, doc);
-            }
+            });
+        }
+
+        CodeLensParams clp = new CodeLensParams();
+        TextDocumentIdentifier tdi = new TextDocumentIdentifier();
+        tdi.setUri(vf.getUrl());
+        clp.setTextDocument(tdi);
+        server.getTextDocumentService().codeLens(clp).thenAccept(cls -> {
+
+            codeLenses.clear();
+            cls.forEach(cl -> {
+                codeLenses.addLens(doc, cl, server);
+            });
+
+            ApplicationManager.getApplication().invokeLater(() -> {
+                GutterAnnotations gutter = new GutterAnnotations(cls);
+                GutterActions actions = new GutterActions(cls);
+                for (Editor e : editors) {
+                    e.getGutter().closeAllAnnotations();
+                    e.getGutter().registerTextAnnotation(gutter, actions);
+                }
+            });
         });
     }
 
     private Balloon currentHint = null;
     private Diagnostic currHintDiag = null;
+    private TooltipGroup magpieGroup = new TooltipGroup("magpie", 1);
 
     private void showMarkup(Diagnostic diag, Editor editor, Document doc) {
         int flags = 0;// HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
@@ -297,6 +452,13 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 ////                                p,
 ////                                hint,
 ////                                HintManager.ABOVE).setContentActive(true));
+
+                        HighlightInfo.Builder hi = HighlightInfo.newHighlightInfo(HighlightInfoType.INFORMATION);
+                        hi.unescapedToolTip("tip");
+                        hi.range(10, 250);
+                        HighlightInfo h = hi.create();
+                        DaemonTooltipUtil.showInfoTooltip(h, editor, 0);
+
                         if (currentHint != null){
                             currentHint.dispose();
                         }
@@ -423,4 +585,42 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         return CompletableFuture.completedFuture(Collections.singletonList(root));
     }
 
+    @Override
+    public void showHTML(MessageParams messageParams) {
+        JFrame frame = new JFrame(messageParams.getType().toString());
+        frame.setUndecorated(true);
+        frame.setOpacity(.5F);
+
+        JFXPanel jfxPanel = new JFXPanel();
+        frame.add(jfxPanel);
+
+        frame.setSize(200, 200);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        Point loc = MouseInfo.getPointerInfo().getLocation();
+        frame.setLocation(loc.x, loc.y);
+
+        PlatformImpl.runLater(() -> {
+             WebView view = new WebView();
+             Scene scene = new Scene(view);
+             jfxPanel.setScene(scene);
+             view.getEngine().loadContent(messageParams.getMessage());
+             int wd = Math.min((int)view.getWidth(), 400);
+             int hl = Math.min((int)view.getHeight(), 300);
+             frame.setSize(wd,hl);
+            frame.setVisible(true);
+            frame.setAlwaysOnTop(true);
+
+            EventHandler<? super KeyEvent> h = scene.getOnKeyPressed();
+             scene.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+                if (e.getCode()== KeyCode.ESCAPE) {
+                    frame.setVisible(false);
+                } else {
+                    if (h != null) {
+                        h.handle(e);
+                    }
+                }
+             });
+        });
+    }
 }

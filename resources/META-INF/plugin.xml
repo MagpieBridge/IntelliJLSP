@@ -41,6 +41,9 @@
     <component>
       <implementation-class>org.magpiebridge.intellij.plugin.Trigger</implementation-class>
     </component>
+    <component>
+      <implementation-class>org.magpiebridge.intellij.plugin.Configuration</implementation-class>
+    </component>
   </project-components>
 
   <actions>

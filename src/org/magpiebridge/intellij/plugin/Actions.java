@@ -14,6 +14,11 @@ public class Actions<T> {
     private final Map<Document, NavigableMap<Integer, T>> lowerBound = new LinkedHashMap<>();
     private final Map<Document, NavigableMap<Integer, T>> upperBound = new LinkedHashMap<>();
 
+    public void clear() {
+        upperBound.clear();
+        lowerBound.clear();
+    }
+
     @NotNull
     public Collection<T> getAction(@NotNull Editor editor) {
         if (lowerBound.containsKey(editor.getDocument())) {

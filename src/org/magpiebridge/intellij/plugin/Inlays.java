@@ -40,6 +40,10 @@ public class Inlays implements InlayHintsProvider {
 
     private static Actions<CodeLensInlay> actions = new Actions<>();
 
+    public void clear() {
+        actions.clear();
+    }
+
     public void addLens(Document doc, CodeLens lens, LanguageServer endpoint) {
         Logger.getInstance(getClass()).info("recording " + lens);
 
@@ -106,18 +110,10 @@ public class Inlays implements InlayHintsProvider {
             public List<Case> getCases() {
                 return Arrays.asList(
                         new Case("show lenses", "showLenses",
-                                new Function0<Boolean>() {
-                                    @Override
-                                    public Boolean invoke() {
-                                        return showLenses;
-                                    }
-                                },
-                                new Function1<Boolean, Unit>() {
-                                    @Override
-                                    public Unit invoke(Boolean aBoolean) {
-                                        showLenses = aBoolean;
-                                        return null;
-                                    }
+                                () -> showLenses,
+                                aBoolean -> {
+                                    showLenses = aBoolean;
+                                    return null;
                                 },
                                 "desciption"));
             }

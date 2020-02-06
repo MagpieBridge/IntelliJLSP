@@ -1,7 +1,10 @@
 package org.magpiebridge.intellij.plugin;
 
+import com.google.gson.JsonObject;
 import com.intellij.AppTopics;
 import com.intellij.codeInsight.hint.HintManager;
+import com.intellij.ide.IdeTooltip;
+import com.intellij.ide.IdeTooltipManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -26,7 +29,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
-import magpiebridge.core.CodeActionCommand;
+import magpiebridge.command.CodeActionCommand;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -37,6 +40,7 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -57,101 +61,6 @@ public class Service {
 
     private final int flags = HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
 
-    private final class GutterActions implements EditorGutterAction {
-        public GutterActions(List<? extends CodeLens> lenses) {
-            this.lenses = new LinkedHashMap<>();
-            lenses.forEach(cl -> this.lenses.put(cl.getRange().getStart().getLine(), cl));
-        }
-
-        private final Map<Integer, CodeLens> lenses;
-
-        @Override
-        public void doAction(int i) {
-            if (lenses.get(i) != null) {
-                Command c = lenses.get(i).getCommand();
-                ExecuteCommandParams params = new ExecuteCommandParams();
-                params.setCommand(c.getCommand());
-                params.setArguments(c.getArguments());
-                server.getWorkspaceService().executeCommand(params);
-            }
-        }
-
-        @Override
-        public Cursor getCursor(int i) {
-            return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
-        }
-    }
-
-    private final class GutterAnnotations implements TextAnnotationGutterProvider {
-
-        public GutterAnnotations(List<? extends CodeLens> lenses) {
-            this.lenses = new LinkedHashMap<>();
-            lenses.forEach(cl -> this.lenses.put(cl.getRange().getStart().getLine(), cl));
-        }
-
-        private final Map<Integer, CodeLens> lenses;
-
-        @Nullable
-        @Override
-        public String getToolTip(int i, Editor editor) {
-            if (lenses.containsKey(i)) {
-                final Command cmd = lenses.get(i).getCommand();
-                StringBuffer msg = new StringBuffer(cmd.getCommand());
-                msg.append("(");
-                if (cmd.getArguments() != null) {
-                    cmd.getArguments().forEach(s -> {
-                        msg.append(s.toString()).append(" ");
-                    });
-                }
-                msg.append(")");
-                return msg.toString();
-            } else {
-                return null;
-            }
-        }
-
-        @Nullable
-        @Override
-        public String getLineText(int i, Editor editor) {
-            return lenses.containsKey(i) ? lenses.get(i).getCommand().getTitle() : null;
-        }
-
-        @Override
-        public EditorFontType getStyle(int i, Editor editor) {
-            return EditorFontType.BOLD;
-        }
-
-        @Nullable
-        @Override
-        public ColorKey getColor(int i, Editor editor) {
-            return ColorKey.createColorKey("LSP", Color.BLUE);
-        }
-
-        @Nullable
-        @Override
-        public Color getBgColor(int i, Editor editor) {
-            return editor.getColorsScheme().getDefaultBackground();
-        }
-
-        @Override
-        public List<AnAction> getPopupActions(int i, Editor editor) {
-            return Collections.singletonList(new AnAction() {
-                @Override
-                public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-                    Command c = lenses.get(i).getCommand();
-                    ExecuteCommandParams params = new ExecuteCommandParams();
-                    params.setCommand(c.getCommand());
-                    params.setArguments(c.getArguments());
-                    server.getWorkspaceService().executeCommand(params);
-                }
-            });
-        }
-
-        @Override
-        public void gutterClosed() {
-
-        }
-    }
 
     private final LanguageServer server;
 
@@ -180,6 +89,10 @@ public class Service {
             init.setCapabilities(cap);
         }
 
+        JsonObject exp = new JsonObject();
+        exp.addProperty("supportsShowHTML", true);
+        cap.setExperimental(exp);
+
         TextDocumentClientCapabilities txt = cap.getTextDocument();
         if (txt == null) {
             txt = new TextDocumentClientCapabilities();
@@ -191,22 +104,33 @@ public class Service {
         txt.setHover(hover);
 
         server.initialize(init).thenAccept(ir -> {
-                    InitializedParams ip = new InitializedParams();
-                    server.initialized(ip);
-
                     MessageBus bus = project.getMessageBus();
                     MessageBusConnection busStop = bus.connect();
 
                     busStop.subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileDocumentManagerListener() {
+                        private int version = 0;
+
                         @Override
                         public void beforeDocumentSaving(@NotNull Document document) {
                             VirtualFile file = FileDocumentManager.getInstance().getFile(document);
-                            DidSaveTextDocumentParams params = new DidSaveTextDocumentParams();
+
+                            VersionedTextDocumentIdentifier vdoc = new VersionedTextDocumentIdentifier();
+                            vdoc.setUri(file.getUrl());
+                            vdoc.setVersion(++version);
+                            DidChangeTextDocumentParams changeParams = new DidChangeTextDocumentParams();
+                            changeParams.setTextDocument(vdoc);
+                            TextDocumentContentChangeEvent c = new TextDocumentContentChangeEvent();
+                            c.setRange(null);
+                            c.setText(document.getText());
+                            changeParams.setContentChanges(Collections.singletonList(c));
+                            server.getTextDocumentService().didChange(changeParams);
+
                             TextDocumentIdentifier doc = new TextDocumentIdentifier();
                             doc.setUri(file.getUrl());
-                            params.setText(document.getText());
-                            params.setTextDocument(doc);
-                            server.getTextDocumentService().didSave(params);
+                            DidSaveTextDocumentParams saveParams = new DidSaveTextDocumentParams();
+                            saveParams.setText(document.getText());
+                            saveParams.setTextDocument(doc);
+                            server.getTextDocumentService().didSave(saveParams);
                         }
 
                         @Override
@@ -236,25 +160,6 @@ public class Service {
                             params.setTextDocument(doc);
 
                             server.getTextDocumentService().didOpen(params);
-
-                            CodeLensParams clp = new CodeLensParams();
-                            TextDocumentIdentifier tdi = new TextDocumentIdentifier();
-                            tdi.setUri(Util.fixUrl(file.getUrl()));
-                            clp.setTextDocument(tdi);
-                            server.getTextDocumentService().codeLens(clp).thenAccept(cls -> {
-
-                                cls.forEach(cl -> {
-                                    codeLenses.addLens(intelliJDoc, cl, server);
-                                });
-
-                                ApplicationManager.getApplication().runReadAction(() -> {
-                                    GutterAnnotations gutter = new GutterAnnotations(cls);
-                                    GutterActions actions = new GutterActions(cls);
-                                    for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
-                                        e.getGutter().registerTextAnnotation(gutter, actions);
-                                    }
-                                });
-                            });
 
                             for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
                                 e.addEditorMouseMotionListener(new EditorMouseMotionListener() {
@@ -369,6 +274,9 @@ public class Service {
                 }
 
         ).join();
+
+        InitializedParams ip = new InitializedParams();
+        server.initialized(ip);
     }
 
     public void shutDown(Runnable andThen) {
