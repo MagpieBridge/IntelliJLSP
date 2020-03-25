@@ -1,14 +1,14 @@
 // a line to edit
 // another line to edit
-package org.magpiebridge.intellij.test;
+package magpiebridge.intellij.test;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.project.Project;
+import magpiebridge.intellij.client.LanguageClient;
 import org.eclipse.lsp4j.*;
-import org.magpiebridge.intellij.client.LanguageClient;
 
 import java.util.Collections;
 

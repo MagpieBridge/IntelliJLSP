@@ -1,4 +1,4 @@
-package org.magpiebridge.intellij.plugin;
+package magpiebridge.intellij.plugin;
 
 import com.intellij.AppTopics;
 import com.intellij.codeInsight.hint.HintManager;
@@ -305,8 +305,8 @@ public class Service {
                         });
                     }
 
-                    if (lc instanceof org.magpiebridge.intellij.client.LanguageClient) {
-                        ((org.magpiebridge.intellij.client.LanguageClient) lc).showDiagnostics(file);
+                    if (lc instanceof magpiebridge.intellij.client.LanguageClient) {
+                        ((magpiebridge.intellij.client.LanguageClient) lc).showDiagnostics(file);
                     }
                 }
 

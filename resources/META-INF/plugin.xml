@@ -1,15 +1,15 @@
 <idea-plugin>
-  <id>org.magpiebridge.intellij</id>
-  <name>LSP Support</name>
+  <id>magpiebridge.intellij</id>
+  <name>MagpieBridge LSP Support</name>
   <version>1.0</version>
-  <vendor email="juliandolby@gmail.com" url="https://github.com/MagpieBridge">MagpieBridge</vendor>
+  <vendor email="juliandolby@gmail.com, linghui@outlook.de" url="https://github.com/MagpieBridge">MagpieBridge</vendor>
 
   <description><![CDATA[
-      Support for LSP, created for Magpie Bridge.
+       This plugin supports language server protocol (LSP), created for MagpieBridge.
     ]]></description>
 
   <change-notes><![CDATA[
-      Initial focus on diagnostics and fixes, as that is what the first study needs.
+      Initial release, focused on diagnostics and code actions.
     ]]>
   </change-notes>
 
@@ -21,20 +21,20 @@
   <depends>com.intellij.modules.lang</depends>
 
   <extensions defaultExtensionNs="com.intellij">
-    <projectConfigurable instance="org.magpiebridge.intellij.plugin.Configuration"></projectConfigurable>
-    <projectService serviceImplementation="org.magpiebridge.intellij.plugin.Trigger"></projectService>
+    <projectConfigurable instance="magpiebridge.intellij.plugin.Configuration"></projectConfigurable>
+    <projectService serviceImplementation="magpiebridge.intellij.plugin.ProjectLSPService"></projectService>
     <intentionAction>
-      <className>org.magpiebridge.intellij.plugin.QuickFixes</className>
+      <className>magpiebridge.intellij.plugin.QuickFixes</className>
       <category>SDK Intentions</category>
     </intentionAction>
    </extensions>
 
   <project-components>
     <component>
-      <implementation-class>org.magpiebridge.intellij.plugin.QuickFixes</implementation-class>
+      <implementation-class>magpiebridge.intellij.plugin.QuickFixes</implementation-class>
     </component>
     <component>
-      <implementation-class>org.magpiebridge.intellij.plugin.Trigger</implementation-class>
+      <implementation-class>magpiebridge.intellij.plugin.ProjectLSPService</implementation-class>
     </component>
   </project-components>
 
@@ -42,36 +42,36 @@
     <!-- Add your actions here -->
     <!-- group id="magpiebridge.intellij.tests.Tests" text="Tests for LSP support" popup="true">
       <add-to-group group-id="ToolsMenu" anchor="last"/>
-      <action id="TestMessages" class="org.magpiebridge.intellij.test.TestMessages" text="TestMessages"
+      <action id="TestMessages" class="TestMessages" text="TestMessages"
               description="Simple test of messages for LSP">
       <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="last"/>
      </action>
     </group>
-    <action id="TestDiagnostic" class="org.magpiebridge.intellij.test.TestDiagnostic" text="TestDiagnostic"
+    <action id="TestDiagnostic" class="TestDiagnostic" text="TestDiagnostic"
             description="Trivia; test of diagnostics for LSP support">
       <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="first"/>
     </action>
-    <action id="TestApplyEdit" class="org.magpiebridge.intellij.test.TestApplyEdit" text="TestApplyEdit"
+    <action id="TestApplyEdit" class="TestApplyEdit" text="TestApplyEdit"
             description="Test applyEdit">
       <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="last"/>
     </action>
-    <action id="TestServer" class="org.magpiebridge.intellij.test.TestServer" text="TestServer"
+    <action id="TestServer" class="TestServer" text="TestServer"
             description="Test Server">
       <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="last"/>
     </action>
-    <action id="TestProblemView" class="org.magpiebridge.intellij.test.TestProblemView" text="TestProblemView"
+    <action id="TestProblemView" class="TestProblemView" text="TestProblemView"
             description="Test ProblemView">
       <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="last"/>
     </action>
-    <action id="TestQuickFix" class="org.magpiebridge.intellij.test.TestQuickFix" text="TestQuickFix"
+    <action id="TestQuickFix" class="TestQuickFix" text="TestQuickFix"
             description="Test QuickFix">
       <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="last"/>
     </action>
-      <action id="TestRemoteServer" class="org.magpiebridge.intellij.test.TestRemoteServer" text="TestRemoteServer"
+      <action id="TestRemoteServer" class="TestRemoteServer" text="TestRemoteServer"
               description="Test remote server">
           <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="first"/>
       </action>
-    <action id="TestConfiguredServer" class="org.magpiebridge.intellij.test.TestConfiguredServer"
+    <action id="TestConfiguredServer" class="TestConfiguredServer"
             text="TestConfiguredServer" description="Test Configured Server">
       <add-to-group group-id="magpiebridge.intellij.tests.Tests" anchor="first"/>
     </action -->

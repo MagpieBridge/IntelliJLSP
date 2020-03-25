@@ -1,6 +1,6 @@
 // line to hack
 // another line to hack
-package org.magpiebridge.intellij.client;
+package magpiebridge.intellij.client;
 
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
@@ -35,13 +35,13 @@ import com.intellij.pom.Navigatable;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.LightweightHint;
 import com.intellij.ui.awt.RelativePoint;
+import magpiebridge.intellij.plugin.QuickFixes;
+import magpiebridge.intellij.plugin.Util;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.magpiebridge.intellij.plugin.QuickFixes;
-import org.magpiebridge.intellij.plugin.Util;
 
 import javax.swing.*;
 import java.awt.Color;

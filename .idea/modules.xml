@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MagpieBridgeLSP.iml" filepath="$PROJECT_DIR$/MagpieBridgeLSP.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MagpieBridgeLSPSupport.iml" filepath="$PROJECT_DIR$/MagpieBridgeLSPSupport.iml" />
     </modules>
   </component>
 </project>

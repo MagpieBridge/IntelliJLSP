@@ -1,4 +1,4 @@
-package org.magpiebridge.intellij.test;
+package magpiebridge.intellij.test;
 
 import com.intellij.compiler.ProblemsView;
 import com.intellij.openapi.actionSystem.AnAction;

@@ -1,4 +1,4 @@
-package org.magpiebridge.intellij.plugin;
+package magpiebridge.intellij.plugin;
 
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;

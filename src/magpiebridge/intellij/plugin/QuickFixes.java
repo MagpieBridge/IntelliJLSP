@@ -1,4 +1,4 @@
-package org.magpiebridge.intellij.plugin;
+package magpiebridge.intellij.plugin;
 
 import com.intellij.codeInsight.intention.AbstractIntentionAction;
 import com.intellij.openapi.command.WriteCommandAction;
