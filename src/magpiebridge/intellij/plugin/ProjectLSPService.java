@@ -9,7 +9,6 @@ import java.io.IOException;
 
 /**
  * Define a project-level LSP service.
- *
  */
 public class ProjectLSPService implements ProjectComponent {
     private final Project project;
@@ -24,15 +23,11 @@ public class ProjectLSPService implements ProjectComponent {
 
     @Override
     public void projectOpened() {
-        try {
-            ServerLauncher.launch(project);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ServerLauncher.launch(project);
     }
 
     @Override
     public void projectClosed() {
-        ServerLauncher.shutDown(project);
+        ServerLauncher.closeProject(project);
     }
 }

@@ -8,16 +8,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.io.File;
 
 /**
@@ -70,8 +64,11 @@ public class Configuration implements Configurable {
         String port=pc.getValue(PORT,"");
         String channel = pc.getValue(CHANNEL, Channel.STDIO);
 
-        JPanel p = new JPanel();
-        p.setLayout(new GridLayout(11, 1));
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+        FlowLayout flowLayout= new FlowLayout();
+        flowLayout.setAlignment(FlowLayout.LEFT);
 
         DocumentListener dl = new DocumentListener() {
             @Override
@@ -91,8 +88,77 @@ public class Configuration implements Configurable {
             }
         };
 
-        FlowLayout flowLayout= new FlowLayout();
-        flowLayout.setAlignment(FlowLayout.LEFT);
+        JPanel channelPanel = new JPanel();
+        channelPanel.setLayout(flowLayout);
+        JComponent channelLabel = new JLabel("LSP communication channel");
+        JRadioButton stdioButton = new JRadioButton("Standard I/O");
+        socketButton= new JRadioButton("Socket");
+
+        JPanel socketPanel = new JPanel();
+        socketPanel.setLayout(flowLayout);
+
+        JPanel stdIoPanel = new JPanel();
+        stdIoPanel.setLayout(new GridLayout(10, 1));
+
+        JLabel hostLabel=new JLabel("Host");
+        hostField =new JTextField(host, 20);
+        hostField.setEnabled(false);
+        hostField.getDocument().addDocumentListener(dl);
+
+        JLabel portLabel=new JLabel("Port");
+        portField=new JTextField(port, 10);
+        portField.setEnabled(false);
+        portField.getDocument().addDocumentListener(dl);
+
+        stdioButton.setSelected(Channel.STDIO.equals(channel));
+        stdIoPanel.setVisible(Channel.STDIO.equals(channel));
+        socketButton.setSelected(Channel.SOCKET.equals(channel));
+        socketPanel.setVisible(Channel.SOCKET.equals(channel));
+
+        stdioButton.addChangeListener(a->{
+            JRadioButton b=(JRadioButton)a.getSource();
+            socketButton.setSelected(!b.isSelected());
+            socketPanel.setVisible(!b.isSelected());
+            stdIoPanel.setVisible(b.isSelected());
+            hostField.setEnabled(!b.isSelected());
+            portField.setEnabled(!b.isSelected());
+
+            isModified = true;
+        });
+
+        socketButton.addChangeListener(a->{
+            JRadioButton b=(JRadioButton)a.getSource();
+            stdioButton.setSelected(!b.isSelected());
+            stdIoPanel.setVisible(!b.isSelected());
+            socketPanel.setVisible(b.isSelected());
+            hostField.setEnabled(b.isSelected());
+            portField.setEnabled(b.isSelected());
+            isModified = true;
+        });
+
+
+
+        hostField.setEnabled(socketButton.isSelected());
+        portField.setEnabled(socketButton.isSelected());
+
+
+
+
+
+        channelPanel.add(channelLabel);
+        channelPanel.add(stdioButton);
+        channelPanel.add(socketButton);
+        mainPanel.add(channelPanel);
+
+
+        socketPanel.add(hostLabel);
+        socketPanel.add(hostField);
+
+        socketPanel.add(portLabel);
+        socketPanel.add(portField);
+        mainPanel.add(socketPanel);
+
+
 
         JPanel jvmPanel= new JPanel();
         jvmPanel.setLayout(flowLayout);
@@ -112,7 +178,7 @@ public class Configuration implements Configurable {
                             false,
                             false,
                             false).withTitle("Select JVM"),
-                    p,
+                    stdIoPanel,
                     null,
                     null);
             if (jvmFile != null && jvmFile.exists()) {
@@ -120,10 +186,10 @@ public class Configuration implements Configurable {
             }
         });
         jvmPanel.add(selectButton);
-        p.add(jvmPanel);
+        stdIoPanel.add(jvmPanel);
 
         JComponent commandText1=new JLabel("Option 1: run java -jar [jar file path] [program arguments]");
-        p.add(commandText1);
+        stdIoPanel.add(commandText1);
 
 
         JPanel jarPanel=new JPanel();
@@ -143,7 +209,7 @@ public class Configuration implements Configurable {
                             true,
                             false,
                             false).withTitle("Select a Jar file"),
-                    p,
+                    stdIoPanel,
                     null,
                     null);
             if (jar != null && jar.exists()) {
@@ -151,10 +217,10 @@ public class Configuration implements Configurable {
             }
         });
         jarPanel.add(selectJarButton);
-        p.add(jarPanel);
+        stdIoPanel.add(jarPanel);
 
         JComponent commandText2=new JLabel("Option 2: run java -cp [class path] [main class] [program arguments]");
-        p.add(commandText2);
+        stdIoPanel.add(commandText2);
 
         JPanel cpPanel=new JPanel();
         cpPanel.setLayout(flowLayout);
@@ -163,7 +229,7 @@ public class Configuration implements Configurable {
         cpField = new JTextField(cpPath, 50);
         cpField.getDocument().addDocumentListener(dl);
         cpPanel.add(cpField);
-        p.add(cpPanel);
+        stdIoPanel.add(cpPanel);
 
 
         JPanel mcPanel=new JPanel();
@@ -173,77 +239,25 @@ public class Configuration implements Configurable {
         mainField = new JTextField(mainClass, 50);
         mainField.getDocument().addDocumentListener(dl);
         mcPanel.add(mainField);
-        p.add(mcPanel);
+        stdIoPanel.add(mcPanel);
 
         JComponent argsText = new JLabel("Program arguments");
-        p.add(argsText);
+        stdIoPanel.add(argsText);
 
         argsField = new JTextField(args, 50);
         argsField.getDocument().addDocumentListener(dl);
-        p.add(argsField);
+        stdIoPanel.add(argsField);
 
         JComponent dirText = new JLabel("Working directory (optional)");
-        p.add(dirText);
+        stdIoPanel.add(dirText);
 
         dirField = new JTextField(dir, 50);
         dirField.getDocument().addDocumentListener(dl);
-        p.add(dirField);
+        stdIoPanel.add(dirField);
+        mainPanel.add(stdIoPanel);
+        mainPanel.add(Box.createVerticalGlue());
 
-
-        JPanel channelPanel = new JPanel();
-        channelPanel.setLayout(flowLayout);
-        JComponent channelLabel = new JLabel("LSP communication channel");
-        JRadioButton stdioButton = new JRadioButton("Standard I/O");
-        socketButton= new JRadioButton("Socket:");
-        JLabel hostLabel=new JLabel("Host");
-        hostField =new JTextField(host, 20);
-        hostField.setEnabled(false);
-        hostField.getDocument().addDocumentListener(dl);
-
-        JLabel portLabel=new JLabel("Port");
-        portField=new JTextField(port, 10);
-        portField.setEnabled(false);
-        portField.getDocument().addDocumentListener(dl);
-
-        stdioButton.setSelected(Channel.STDIO.equals(channel));
-        socketButton.setSelected(Channel.SOCKET.equals(channel));
-
-        stdioButton.addChangeListener(a->{
-            JRadioButton b=(JRadioButton)a.getSource();
-            socketButton.setSelected(!b.isSelected());
-            hostField.setEnabled(!b.isSelected());
-            portField.setEnabled(!b.isSelected());
-            isModified = true;
-        });
-
-        socketButton.addChangeListener(a->{
-            JRadioButton b=(JRadioButton)a.getSource();
-            stdioButton.setSelected(!b.isSelected());
-            hostField.setEnabled(b.isSelected());
-            portField.setEnabled(b.isSelected());
-            isModified = true;
-        });
-
-
-
-        hostField.setEnabled(socketButton.isSelected());
-        portField.setEnabled(socketButton.isSelected());
-
-
-        channelPanel.add(channelLabel);
-        channelPanel.add(stdioButton);
-        channelPanel.add(socketButton);
-
-
-        channelPanel.add(hostLabel);
-        channelPanel.add(hostField);
-
-        channelPanel.add(portLabel);
-        channelPanel.add(portField);
-
-        p.add(channelPanel);
-
-        return p;
+        return mainPanel;
     }
 
     @Override

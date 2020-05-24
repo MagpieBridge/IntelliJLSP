@@ -10,10 +10,6 @@ public class TestConfiguredServer extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        try {
-            ServerLauncher.launch(e.getProject());
-       } catch (IOException exc) {
-            assert false : exc.getMessage();
-        }
+        ServerLauncher.launch(e.getProject());
     }
 }

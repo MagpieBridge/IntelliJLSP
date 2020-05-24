@@ -18,6 +18,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SimpleTimerTask;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.messages.MessageBus;
@@ -33,11 +34,9 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.Timer;
 
 public class Service {
 
@@ -317,6 +316,11 @@ public class Service {
 
                 @Override
                 public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+                    DidCloseTextDocumentParams params = new DidCloseTextDocumentParams();
+                    TextDocumentIdentifier doc = new TextDocumentIdentifier();
+                    doc.setUri(Util.fixUrl(file.getUrl()));
+                    params.setTextDocument(doc);
+                    server.getTextDocumentService().didClose(params);
 
                 }
             });
@@ -326,10 +330,21 @@ public class Service {
     }
 
     public void shutDown(Runnable andThen){
-        server.shutdown().thenRunAsync(andThen);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask(){
+            @Override
+            public void run() {
+                andThen.run();
+            }
+        }, 3000); // run andThen after timeout of 3 seconds, if server does not respond to shutdown
+        server.shutdown().thenRunAsync(()->{
+            timer.cancel();
+            andThen.run();
+        });
     }
 
-    public static Service getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, Service.class);
+    public void exit() {
+        server.exit();
     }
+
 }
