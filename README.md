@@ -15,6 +15,6 @@ This is a IntelliJ Plugin which supports the language server protocol. It is mad
 - `PATH Variable`: your system environment variable `PATH`, it is important to set if the language server runs another program which ought to be found in `PATH`.
 - `Jar file path`: path to your language server jar file
 - `Program arguments`: arguements for your language server.
-- `Working directory`: directory where the server should observe, the default is the root path of the current opening project in the IDE. 
+- `Working directory (optional)`: directory where the server should observe. If not set, the default is the root path of the current opening project in the IDE. 
 ## Contact 
 &#x2709; linghui[at]outlook.de
