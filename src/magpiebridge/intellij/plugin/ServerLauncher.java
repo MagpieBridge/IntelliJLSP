@@ -32,13 +32,19 @@ public class ServerLauncher {
     private static Map<Project, Future> listening = new ConcurrentHashMap<>();
 
 
-    public static void launch(Project project) {
+        public static void launch(Project project) {
+
         projects.add(project);
         PropertiesComponent pc = PropertiesComponent.getInstance();
         String channel = pc.getValue(Configuration.CHANNEL);
         if (channel == null){
             return;
         }
+        String path = pc.getValue(Configuration.PATH);
+        String currentPath = System.getenv("PATH");
+        String newPath=currentPath;
+        if(path!=null&&!path.equals(currentPath))
+          newPath=currentPath+File.pathSeparator+path;
         String jarPath = pc.getValue(Configuration.JAR);
         String cpPath = pc.getValue(Configuration.CP);
         String mainClass = pc.getValue(Configuration.MAIN);
@@ -48,6 +54,7 @@ public class ServerLauncher {
         String host = pc.getValue(Configuration.HOST);
         String port = pc.getValue(Configuration.PORT);
         ProcessBuilder proc = new ProcessBuilder();
+        proc.environment().put("PATH",newPath);
         if (dir != null && !dir.isEmpty()) {
             File df = new File(dir);
             if (df.exists() && df.isDirectory()) {

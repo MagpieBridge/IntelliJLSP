@@ -5,6 +5,7 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.apache.xmlbeans.impl.jam.JComment;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +29,7 @@ public class Configuration implements Configurable {
     protected static final String CHANNEL="lsp.channel";
     protected static final String HOST="lsp.host";
     protected static final String PORT="lsp.port";
+    protected static final String PATH ="PATH";
 
     private JTextField jarField;
     private JTextField cpField;
@@ -35,6 +37,7 @@ public class Configuration implements Configurable {
     private JTextField argsField;
     private JTextField dirField;
     private JTextField jvmField;
+    private JTextField pathField;
     private JTextField hostField;
     private JTextField portField;
     private JRadioButton socketButton;
@@ -53,8 +56,8 @@ public class Configuration implements Configurable {
         PropertiesComponent pc = PropertiesComponent.getInstance();
         String javaHome = System.getProperty("java.home");
         File javaPath = new File(javaHome, "bin/java");
-
         String jvm = pc.getValue(JVM, javaPath.getAbsolutePath());
+        String path= pc. getValue(PATH, System.getenv("PATH"));
         String jarPath = pc.getValue(JAR, "");
         String cpPath = pc.getValue(CP, "");
         String mainClass = pc.getValue(MAIN, "");
@@ -98,7 +101,7 @@ public class Configuration implements Configurable {
         socketPanel.setLayout(flowLayout);
 
         JPanel stdIoPanel = new JPanel();
-        stdIoPanel.setLayout(new GridLayout(10, 1));
+        stdIoPanel.setLayout(new GridLayout(11, 1));
 
         JLabel hostLabel=new JLabel("Host");
         hostField =new JTextField(host, 20);
@@ -188,6 +191,15 @@ public class Configuration implements Configurable {
         jvmPanel.add(selectButton);
         stdIoPanel.add(jvmPanel);
 
+        JComponent pathPanel= new JPanel();
+        pathPanel.setLayout(flowLayout);
+        JComponent pathText=new JLabel("PATH Variable: ");
+        pathPanel.add(pathText);
+        pathField = new JTextField(path, 50);
+        pathField.getDocument().addDocumentListener(dl);
+        pathPanel.add(pathField);
+        stdIoPanel.add(pathPanel);
+
         JComponent commandText1=new JLabel("Option 1: run java -jar [jar file path] [program arguments]");
         stdIoPanel.add(commandText1);
 
@@ -274,6 +286,7 @@ public class Configuration implements Configurable {
         pc.setValue(MAIN, mainField.getText());
         pc.setValue(ARGS, argsField.getText());
         pc.setValue(DIR, dirField.getText());
+        pc.setValue(PATH, pathField.getText());
         if(socketButton.isSelected()) {
             pc.setValue(CHANNEL, Channel.SOCKET);
             pc.setValue(HOST, hostField.getText());
