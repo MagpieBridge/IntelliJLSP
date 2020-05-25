@@ -235,7 +235,6 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         List<Diagnostic> diagnostics = publishedDiagnostics.get(vf);
 
         UUID uuid =  UUID.randomUUID();
-        pv.clearOldMessages(null, uuid);
         diagnostics.forEach((diag) -> {
             Range rng = diag.getRange();
             Position start = rng.getStart();
