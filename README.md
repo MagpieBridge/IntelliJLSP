@@ -9,4 +9,8 @@ This is a IntelliJ Plugin which supports the language server protocol. It is mad
 ## How to configure a language server?
 - Choose `IntelliJ >> Settings >> Other Settings >> MagpieBridge LSP Configuration. 
 - Currenlty it only supports to use Java to run a language server. The following screenshot shows the configuration to run the server `inferIDE-0.0.1.jar` with Java 8.
-![](https://github.com/MagpieBridge/MagpieBridge/blob/develop/doc/intellij.PNG)
+![configuration](https://github.com/MagpieBridge/MagpieBridge/blob/develop/doc/intellij.PNG)
+
+
+## Contact 
+&#x2709; linghui[at]outlook.de
