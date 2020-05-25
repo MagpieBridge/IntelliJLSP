@@ -9,6 +9,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="org.eclipse.lsp4j:org.eclipse.lsp4j:0.6.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" exported="" name="org.eclipse.lsp4j:org.eclipse.lsp4j:0.8.1" level="project" />
   </component>
 </module>

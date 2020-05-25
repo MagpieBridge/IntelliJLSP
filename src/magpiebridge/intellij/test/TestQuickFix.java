@@ -1,4 +1,4 @@
-package org.magpiebridge.intellij.test;
+package magpiebridge.intellij.test;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -7,10 +7,9 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.project.Project;
+import magpiebridge.intellij.plugin.QuickFixes;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageServer;
-import org.magpiebridge.intellij.plugin.QuickFixes;
-import org.magpiebridge.intellij.plugin.QuickFixes.QuickFix;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,14 +45,14 @@ public class TestQuickFix extends AnAction {
         cmd.setTitle("replace with 'XXXXXXXX'");
         cmd.setCommand("FIX");
         cmd.setArguments(Arrays.asList(r));
-        QuickFix qf1 = new QuickFix(cmd, server);
+        QuickFixes.QuickFix qf1 = new QuickFixes.QuickFix(cmd, server);
 
         CodeAction ca = new CodeAction();
         ca.setDiagnostics(Arrays.asList(diag));
         ca.setCommand(cmd);
         ca.setTitle("replace with 'XXXXXXXX'");
         ca.setKind("Quick Fix");
-        QuickFix qf2 = new QuickFix(ca, server);
+        QuickFixes.QuickFix qf2 = new QuickFixes.QuickFix(ca, server);
 
         CodeAction cwe = new CodeAction();
         WorkspaceEdit we = new WorkspaceEdit();
@@ -62,7 +61,7 @@ public class TestQuickFix extends AnAction {
         te.setNewText("XXXXXXXX");
         we.setChanges(Collections.singletonMap(fe.getFile().getUrl(), Collections.singletonList(te)));
         cwe.setEdit(we);
-        QuickFix qf3 = new QuickFix(cwe, server);
+        QuickFixes.QuickFix qf3 = new QuickFixes.QuickFix(cwe, server);
 
         qf.addFix(doc, r, qf1, qf2, qf3);
     }

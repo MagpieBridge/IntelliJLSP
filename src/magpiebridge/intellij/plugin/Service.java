@@ -1,4 +1,4 @@
-package org.magpiebridge.intellij.plugin;
+package magpiebridge.intellij.plugin;
 
 import com.intellij.AppTopics;
 import com.intellij.codeInsight.hint.HintManager;
@@ -18,6 +18,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SimpleTimerTask;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.messages.MessageBus;
@@ -33,10 +34,9 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.*;
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.Timer;
 
 public class Service {
 
@@ -136,10 +136,12 @@ public class Service {
     private final LanguageServer server;
 
     private final Project project;
+    private  QuickFixes codeActions;
 
     public Service(Project project, LanguageServer server, LanguageClient lc) {
         this.project = project;
         this.server = server;
+        this.codeActions = project.getComponent(QuickFixes.class);
 
         if (server instanceof LanguageClientAware) {
             ((LanguageClientAware)server).connect(lc);
@@ -259,8 +261,21 @@ public class Service {
                                     mp.setCharacter(col);
                                     pos.setPosition(mp);
                                     TextDocumentIdentifier id = new TextDocumentIdentifier();
-                                    id.setUri(Util.fixUrl(file.getUrl()));
+                                    String uri= Util.fixUrl(file.getUrl());
+                                    id.setUri(uri);
                                     pos.setTextDocument(id);
+                                    CodeActionParams codeActionParams = new CodeActionParams();
+                                    Range range =new Range(mp, mp);
+                                    codeActionParams.setRange(range);
+                                    codeActionParams.setTextDocument(id);
+                                    codeActionParams.setContext(new CodeActionContext(new ArrayList<Diagnostic>()));
+                                    server.getTextDocumentService().codeAction(codeActionParams).thenAccept(actions->{
+                                        if(actions.size()>=0) {
+                                            codeActions.addCodeActions(Util.getDocument(file), range, server, actions);
+                                        }
+                                    });
+
+
                                     server.getTextDocumentService().hover(pos).thenAccept(h -> {
                                         if (h != null) {
                                             String text = "";
@@ -289,8 +304,8 @@ public class Service {
                         });
                     }
 
-                    if (lc instanceof org.magpiebridge.intellij.client.LanguageClient) {
-                        ((org.magpiebridge.intellij.client.LanguageClient) lc).showDiagnostics(file);
+                    if (lc instanceof magpiebridge.intellij.client.LanguageClient) {
+                        ((magpiebridge.intellij.client.LanguageClient) lc).showDiagnostics(file);
                     }
                 }
 
@@ -301,6 +316,11 @@ public class Service {
 
                 @Override
                 public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+                    DidCloseTextDocumentParams params = new DidCloseTextDocumentParams();
+                    TextDocumentIdentifier doc = new TextDocumentIdentifier();
+                    doc.setUri(Util.fixUrl(file.getUrl()));
+                    params.setTextDocument(doc);
+                    server.getTextDocumentService().didClose(params);
 
                 }
             });
@@ -310,10 +330,21 @@ public class Service {
     }
 
     public void shutDown(Runnable andThen){
-        server.shutdown().thenRunAsync(andThen);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask(){
+            @Override
+            public void run() {
+                andThen.run();
+            }
+        }, 3000); // run andThen after timeout of 3 seconds, if server does not respond to shutdown
+        server.shutdown().thenRunAsync(()->{
+            timer.cancel();
+            andThen.run();
+        });
     }
 
-    public static Service getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, Service.class);
+    public void exit() {
+        server.exit();
     }
+
 }

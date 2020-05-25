@@ -1,4 +1,4 @@
-package org.magpiebridge.intellij.test;
+package magpiebridge.intellij.test;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
