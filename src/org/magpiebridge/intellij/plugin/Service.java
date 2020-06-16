@@ -3,15 +3,13 @@ package org.magpiebridge.intellij.plugin;
 import com.google.gson.JsonObject;
 import com.intellij.AppTopics;
 import com.intellij.codeInsight.hint.HintManager;
-import com.intellij.ide.IdeTooltip;
-import com.intellij.ide.IdeTooltipManager;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.lang.Language;
+import com.intellij.lang.LanguageDocumentation;
+import com.intellij.lang.documentation.DocumentationProvider;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.editor.*;
-import com.intellij.openapi.editor.colors.ColorKey;
-import com.intellij.openapi.editor.colors.EditorFontType;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseEventArea;
 import com.intellij.openapi.editor.event.EditorMouseMotionListener;
@@ -35,21 +33,17 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
+import org.magpiebridge.intellij.client.LanguageClient;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import java.awt.Color;
-import java.awt.*;
 import java.net.URL;
-import java.util.List;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -61,8 +55,8 @@ public class Service {
 
     private final int flags = HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
 
-
-    private final LanguageServer server;
+    final LanguageServer server;
+    final LanguageClient client;
 
     private final Project project;
     private QuickFixes codeActions;
@@ -71,8 +65,20 @@ public class Service {
     public Service(Project project, LanguageServer server, LanguageClient lc) {
         this.project = project;
         this.server = server;
+        this.client = lc;
         this.codeActions = project.getComponent(QuickFixes.class);
         this.codeLenses = project.getComponent(Inlays.class);
+
+        for(String s : new String[]{"JAVA", "Python"}) {
+            Language lang = Language.findLanguageByID(s);
+            if (lang != null) {
+                DocumentationProvider current = LanguageDocumentation.INSTANCE.forLanguage(lang);
+                DocumentationProvider dp = project.getComponent(DiagnosticProvider.class).setServer(this).setBase(current);
+                DocumentationProvider hp = new HoverProvider().setServer(this).setBase(dp);
+
+                LanguageDocumentation.INSTANCE.addExplicitExtension(lang, hp);
+            }
+        }
 
         if (server instanceof LanguageClientAware) {
             ((LanguageClientAware) server).connect(lc);

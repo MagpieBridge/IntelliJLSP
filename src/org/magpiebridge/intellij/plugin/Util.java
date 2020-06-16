@@ -1,5 +1,6 @@
 package org.magpiebridge.intellij.plugin;
 
+import com.intellij.lang.documentation.DocumentationProvider;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
@@ -8,15 +9,18 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.psi.PsiElement;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.*;
-import java.nio.charset.UnsupportedCharsetException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -91,6 +95,28 @@ public class Util {
         params.setCommand(cmd.getCommand());
         params.setArguments(cmd.getArguments());
         server.getWorkspaceService().executeCommand(params);
+    }
+
+    com.intellij.lang.documentation.DocumentationProvider concat(com.intellij.lang.documentation.DocumentationProvider... ps) {
+        return new DocumentationProvider() {
+            @Nullable
+            @Override
+            public String getQuickNavigateInfo(PsiElement element, PsiElement originalElement) {
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public String generateDoc(PsiElement element, @Nullable PsiElement originalElement) {
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public String generateHoverDoc(@NotNull PsiElement element, @Nullable PsiElement originalElement) {
+                return null;
+            }
+        };
     }
 
 }

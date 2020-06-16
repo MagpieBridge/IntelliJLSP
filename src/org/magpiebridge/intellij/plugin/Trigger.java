@@ -1,11 +1,8 @@
 package org.magpiebridge.intellij.plugin;
 
-import com.intellij.codeInsight.daemon.impl.quickfix.ReplacePrimitiveWithBoxedTypeAction;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

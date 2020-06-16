@@ -7,12 +7,9 @@ import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
-import com.intellij.codeInsight.hint.TooltipController;
 import com.intellij.codeInsight.hint.TooltipGroup;
 import com.intellij.compiler.ProblemsView;
-import com.intellij.execution.Platform;
-import com.intellij.ide.IdeTooltip;
-import com.intellij.ide.IdeTooltipManager;
+import com.intellij.compiler.impl.FileSetCompileScope;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -20,6 +17,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.compiler.CompileScope;
 import com.intellij.openapi.compiler.CompilerMessage;
 import com.intellij.openapi.compiler.CompilerMessageCategory;
 import com.intellij.openapi.diagnostic.Logger;
@@ -32,8 +30,8 @@ import com.intellij.openapi.editor.event.EditorMouseMotionListener;
 import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
@@ -41,41 +39,30 @@ import com.intellij.openapi.ui.popup.JBPopupListener;
 import com.intellij.openapi.ui.popup.LightweightWindowEvent;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
-import com.intellij.ui.HintHint;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.LightweightHint;
 import com.intellij.ui.awt.RelativePoint;
-import com.intellij.util.messages.MessageBus;
 import com.sun.javafx.application.PlatformImpl;
-import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.EventHandler;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.web.WebView;
-import magpiebridge.command.CodeActionCommand;
 import magpiebridge.core.MagpieLanguageClient;
 import org.eclipse.lsp4j.*;
-import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.magpiebridge.intellij.plugin.DiagnosticProvider;
 import org.magpiebridge.intellij.plugin.Inlays;
 import org.magpiebridge.intellij.plugin.QuickFixes;
-import org.magpiebridge.intellij.plugin.Service;
 import org.magpiebridge.intellij.plugin.Util;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import java.awt.Color;
 import java.awt.*;
-import java.net.URL;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -85,7 +72,7 @@ public class LanguageClient implements MagpieLanguageClient {
     private LanguageServer server;
     private final ProblemsView pv;
     private final QuickFixes intentions;
-    private final Map<VirtualFile, List<Diagnostic>> publishedDiagnostics = new HashMap<>();
+    public final Map<VirtualFile, List<Diagnostic>> publishedDiagnostics = new HashMap<>();
     private Inlays codeLenses;
 
     private final class GutterActions implements EditorGutterAction {
@@ -209,6 +196,8 @@ public class LanguageClient implements MagpieLanguageClient {
     private void applyEdit(String file, List<TextEdit> edits) {
         VirtualFile vf = Util.getVirtualFile(file);
         Document doc = FileDocumentManager.getInstance().getDocument(vf);
+        edits = new ArrayList<>(edits);
+        Collections.reverse(edits);
         for(TextEdit edit : edits) {
            Range rng = edit.getRange();
            Position start = rng.getStart();
@@ -258,15 +247,14 @@ public class LanguageClient implements MagpieLanguageClient {
 
     @Override
     public void publishDiagnostics(PublishDiagnosticsParams params) {
-
         String file = params.getUri();
         VirtualFile vf = Util.getVirtualFile(file);
 
         this.publishedDiagnostics.put(vf, params.getDiagnostics());
         showDiagnostics(vf);
-    }
 
-    private UUID myUUID = UUID.randomUUID();
+        project.getComponent(DiagnosticProvider.class).updateDiagnostics();
+    }
 
     public void showDiagnostics(VirtualFile vf){
         if (!publishedDiagnostics.containsKey(vf)){
@@ -276,7 +264,9 @@ public class LanguageClient implements MagpieLanguageClient {
         List<Diagnostic> diagnostics = publishedDiagnostics.get(vf);
 
         if (pv != null) {
-            pv.clearOldMessages(null, myUUID);
+            UUID myUUID = UUID.randomUUID();
+            CompileScope s = new FileSetCompileScope(Collections.singleton(vf), new Module[0]);
+            pv.clearOldMessages(s, myUUID);
             diagnostics.forEach(diag -> {
                 Range rng = diag.getRange();
                 Position start = rng.getStart();
@@ -559,16 +549,20 @@ public class LanguageClient implements MagpieLanguageClient {
     @Override
     public CompletableFuture<MessageActionItem> showMessageRequest(ShowMessageRequestParams params) {
         int[] choice = new int[1];
-        WriteCommandAction.runWriteCommandAction(project, () -> {
-            List<String> options = new ArrayList<>();
-            params.getActions().forEach((a) -> options.add(a.getTitle()));
-            String[] x = options.toArray(new String[params.getActions().size()]);
-            choice[0] = Messages.showDialog(params.getMessage(),
-                    params.getType().toString(),
-                    x,
-                    0,
-                    Messages.getQuestionIcon());
-        });
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                List<String> options = new ArrayList<>();
+                params.getActions().forEach((a) -> options.add(a.getTitle()));
+                String[] x = options.toArray(new String[params.getActions().size()]);
+                choice[0] = Messages.showDialog(params.getMessage(),
+                        params.getType().toString(),
+                        x,
+                        0,
+                        Messages.getQuestionIcon());
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            assert false :  e;
+        }
         return CompletableFuture.completedFuture(params.getActions().get(choice[0]));
     }
 
@@ -589,7 +583,8 @@ public class LanguageClient implements MagpieLanguageClient {
     public void showHTML(MessageParams messageParams) {
         JFrame frame = new JFrame(messageParams.getType().toString());
         frame.setUndecorated(true);
-        frame.setOpacity(.5F);
+        frame.setOpacity(.7F);
+        frame.setResizable(true);
 
         JFXPanel jfxPanel = new JFXPanel();
         frame.add(jfxPanel);
@@ -605,8 +600,8 @@ public class LanguageClient implements MagpieLanguageClient {
              Scene scene = new Scene(view);
              jfxPanel.setScene(scene);
              view.getEngine().loadContent(messageParams.getMessage());
-             int wd = Math.min((int)view.getWidth(), 400);
-             int hl = Math.min((int)view.getHeight(), 300);
+             int wd = Math.max((int)view.widthProperty().floatValue(), 400);
+             int hl = Math.max((int)view.heightProperty().floatValue(), 300);
              frame.setSize(wd,hl);
             frame.setVisible(true);
             frame.setAlwaysOnTop(true);

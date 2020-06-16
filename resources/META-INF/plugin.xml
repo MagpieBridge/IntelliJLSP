@@ -27,6 +27,8 @@
       <className>org.magpiebridge.intellij.plugin.QuickFixes</className>
       <category>SDK Intentions</category>
     </intentionAction>
+    <lang.documentationProvider implementationClass="org.magpiebridge.intellij.plugin.HoverProvider"/>
+    <lang.documentationProvider implementationClass="org.magpiebridge.intellij.plugin.DiagnosticProvider"/>
     <codeInsight.inlayProvider language="JAVA" implementationClass="org.magpiebridge.intellij.plugin.Inlays"/>
     <codeInsight.inlayProvider language="Python" implementationClass="org.magpiebridge.intellij.plugin.Inlays"/>
   </extensions>
@@ -44,7 +46,10 @@
     <component>
       <implementation-class>org.magpiebridge.intellij.plugin.Configuration</implementation-class>
     </component>
-  </project-components>
+    <component>
+      <implementation-class>org.magpiebridge.intellij.plugin.DiagnosticProvider</implementation-class>
+    </component>
+   </project-components>
 
   <actions>
     <!-- Add your actions here

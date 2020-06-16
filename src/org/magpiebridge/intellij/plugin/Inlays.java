@@ -13,23 +13,19 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.messages.Topic;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-import kotlin.jvm.functions.Function1;
-import kotlin.jvm.functions.Function2;
 import org.eclipse.lsp4j.CodeLens;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.magpiebridge.intellij.client.LanguageClient;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class Inlays implements InlayHintsProvider {

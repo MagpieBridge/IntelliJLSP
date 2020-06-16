@@ -1,10 +1,7 @@
 package org.magpiebridge.intellij.plugin;
 
-import com.google.common.io.ByteSink;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
-import magpiebridge.core.MagpieLanguageClient;
-import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.eclipse.lsp4j.launch.LSPLauncher;
