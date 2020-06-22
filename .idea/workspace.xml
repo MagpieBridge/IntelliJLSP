@@ -4,7 +4,6 @@
     <list default="true" id="013b7a03-4af3-42b2-bda2-df133cde2e26" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Util.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Util.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -273,11 +272,6 @@
           <url>file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/HoverProvider.java</url>
           <line>61</line>
           <option name="timeStamp" value="36" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java</url>
-          <line>197</line>
-          <option name="timeStamp" value="41" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

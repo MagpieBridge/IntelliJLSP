@@ -194,24 +194,6 @@ public class LanguageClient implements MagpieLanguageClient {
         this.server = server;
     }
 
-    private void applyEdit(String file, List<TextEdit> edits) {
-        VirtualFile vf = Util.getVirtualFile(file);
-        Document doc = FileDocumentManager.getInstance().getDocument(vf);
-        List<Function<Void,Void>> fixes = new ArrayList<>();
-        for(int i = edits.size() - 1; i >= 0; i--) {
-            TextEdit edit = edits.get(i);
-            Range rng = edit.getRange();
-            Position start = rng.getStart();
-            int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
-            Position end = rng.getEnd();
-            int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
-            fixes.add(0, (v) -> {
-             doc.replaceString(startOffset, endOffset, edit.getNewText());
-             return null; });
-        }
-        fixes.forEach(f -> f.apply(null));
-    }
-
     private void setSelection(String file, Range range){
         VirtualFile vf = Util.getVirtualFile(file);
         Document doc = Util.getDocument(vf);
@@ -236,7 +218,7 @@ public class LanguageClient implements MagpieLanguageClient {
     @Override
     public CompletableFuture<ApplyWorkspaceEditResponse> applyEdit(ApplyWorkspaceEditParams params) {
         WriteCommandAction.runWriteCommandAction(project, () ->
-            params.getEdit().getChanges().forEach((file, edits) -> applyEdit(file, edits)));
+            params.getEdit().getChanges().forEach((file, edits) -> Util.applyEdit(file, edits)));
         ApplyWorkspaceEditResponse ret = new ApplyWorkspaceEditResponse();
         ret.setApplied(true);
         return CompletableFuture.completedFuture(ret);
