@@ -2,21 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="013b7a03-4af3-42b2-bda2-df133cde2e26" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/DiagnosticProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/HoverProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/MagpieDocumentationProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/magpiebridge_magpiebridge_0_0_3_SNAPSHOT.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/magpiebridge_magpiebridge_0_0_3_SNAPSHOT.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/resources/META-INF/plugin.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Inlays.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Inlays.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Launcher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Service.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Trigger.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Trigger.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Util.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/Util.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestApplyEdit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestApplyEdit.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestMessages.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestMessages.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/test/TestRemoteServer.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +72,7 @@
     <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="org.magpiebridge.intellij.plugin.Configuration" />
   </component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
@@ -201,62 +189,62 @@
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="489" y="244" key="FileChooserDialogImpl/0.0.1440.900@0.0.1440.900" timestamp="1592270107461" />
-    <state width="1113" height="190" key="GridCell.Tab.0.bottom" timestamp="1584962752980">
+    <state width="1113" height="190" key="GridCell.Tab.0.bottom" timestamp="1592788630441">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1584962752980" />
-    <state width="1113" height="190" key="GridCell.Tab.0.center" timestamp="1584962752979">
+    <state width="1113" height="190" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1592788630441" />
+    <state width="1113" height="190" key="GridCell.Tab.0.center" timestamp="1592788630439">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1584962752979" />
-    <state width="1113" height="190" key="GridCell.Tab.0.left" timestamp="1584962752979">
+    <state width="1113" height="190" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1592788630439" />
+    <state width="1113" height="190" key="GridCell.Tab.0.left" timestamp="1592788630439">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1584962752979" />
-    <state width="1113" height="190" key="GridCell.Tab.0.right" timestamp="1584962752980">
+    <state width="1113" height="190" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1592788630439" />
+    <state width="1113" height="190" key="GridCell.Tab.0.right" timestamp="1592788630440">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1584962752980" />
-    <state width="1113" height="190" key="GridCell.Tab.1.bottom" timestamp="1584962752981">
+    <state width="1113" height="190" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1592788630440" />
+    <state width="1113" height="190" key="GridCell.Tab.1.bottom" timestamp="1592788630444">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.1.bottom/0.0.1440.900@0.0.1440.900" timestamp="1584962752981" />
-    <state width="1113" height="190" key="GridCell.Tab.1.center" timestamp="1584962752981">
+    <state width="1113" height="190" key="GridCell.Tab.1.bottom/0.0.1440.900@0.0.1440.900" timestamp="1592788630444" />
+    <state width="1113" height="190" key="GridCell.Tab.1.center" timestamp="1592788630442">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.1.center/0.0.1440.900@0.0.1440.900" timestamp="1584962752981" />
-    <state width="1113" height="190" key="GridCell.Tab.1.left" timestamp="1584962752980">
+    <state width="1113" height="190" key="GridCell.Tab.1.center/0.0.1440.900@0.0.1440.900" timestamp="1592788630442" />
+    <state width="1113" height="190" key="GridCell.Tab.1.left" timestamp="1592788630442">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.1.left/0.0.1440.900@0.0.1440.900" timestamp="1584962752980" />
-    <state width="1113" height="190" key="GridCell.Tab.1.right" timestamp="1584962752981">
+    <state width="1113" height="190" key="GridCell.Tab.1.left/0.0.1440.900@0.0.1440.900" timestamp="1592788630442" />
+    <state width="1113" height="190" key="GridCell.Tab.1.right" timestamp="1592788630444">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.1.right/0.0.1440.900@0.0.1440.900" timestamp="1584962752981" />
-    <state width="1113" height="190" key="GridCell.Tab.2.bottom" timestamp="1584962752983">
+    <state width="1113" height="190" key="GridCell.Tab.1.right/0.0.1440.900@0.0.1440.900" timestamp="1592788630444" />
+    <state width="1113" height="190" key="GridCell.Tab.2.bottom" timestamp="1592788630448">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.2.bottom/0.0.1440.900@0.0.1440.900" timestamp="1584962752983" />
-    <state width="1113" height="190" key="GridCell.Tab.2.center" timestamp="1584962752982">
+    <state width="1113" height="190" key="GridCell.Tab.2.bottom/0.0.1440.900@0.0.1440.900" timestamp="1592788630448" />
+    <state width="1113" height="190" key="GridCell.Tab.2.center" timestamp="1592788630446">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.2.center/0.0.1440.900@0.0.1440.900" timestamp="1584962752982" />
-    <state width="1113" height="190" key="GridCell.Tab.2.left" timestamp="1584962752982">
+    <state width="1113" height="190" key="GridCell.Tab.2.center/0.0.1440.900@0.0.1440.900" timestamp="1592788630446" />
+    <state width="1113" height="190" key="GridCell.Tab.2.left" timestamp="1592788630445">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.2.left/0.0.1440.900@0.0.1440.900" timestamp="1584962752982" />
-    <state width="1113" height="190" key="GridCell.Tab.2.right" timestamp="1584962752983">
+    <state width="1113" height="190" key="GridCell.Tab.2.left/0.0.1440.900@0.0.1440.900" timestamp="1592788630445" />
+    <state width="1113" height="190" key="GridCell.Tab.2.right" timestamp="1592788630447">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1113" height="190" key="GridCell.Tab.2.right/0.0.1440.900@0.0.1440.900" timestamp="1584962752983" />
-    <state x="245" y="249" key="IDE.errors.dialog" timestamp="1591793663578">
+    <state width="1113" height="190" key="GridCell.Tab.2.right/0.0.1440.900@0.0.1440.900" timestamp="1592788630447" />
+    <state x="245" y="249" key="IDE.errors.dialog" timestamp="1592679355711">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="245" y="249" key="IDE.errors.dialog/0.0.1440.900@0.0.1440.900" timestamp="1591793663578" />
-    <state x="159" y="138" key="SettingsEditor" timestamp="1592270115165">
+    <state x="245" y="249" key="IDE.errors.dialog/0.0.1440.900@0.0.1440.900" timestamp="1592679355711" />
+    <state x="159" y="138" key="SettingsEditor" timestamp="1592531569152">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="159" y="138" key="SettingsEditor/0.0.1440.900@0.0.1440.900" timestamp="1592270115165" />
+    <state x="159" y="138" key="SettingsEditor/0.0.1440.900@0.0.1440.900" timestamp="1592531569152" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -285,6 +273,11 @@
           <url>file://$PROJECT_DIR$/src/org/magpiebridge/intellij/plugin/HoverProvider.java</url>
           <line>61</line>
           <option name="timeStamp" value="36" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java</url>
+          <line>197</line>
+          <option name="timeStamp" value="41" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

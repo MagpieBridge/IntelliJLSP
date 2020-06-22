@@ -66,6 +66,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class LanguageClient implements MagpieLanguageClient {
     private final Project project;
@@ -196,16 +197,19 @@ public class LanguageClient implements MagpieLanguageClient {
     private void applyEdit(String file, List<TextEdit> edits) {
         VirtualFile vf = Util.getVirtualFile(file);
         Document doc = FileDocumentManager.getInstance().getDocument(vf);
-        edits = new ArrayList<>(edits);
-        Collections.reverse(edits);
-        for(TextEdit edit : edits) {
-           Range rng = edit.getRange();
-           Position start = rng.getStart();
-           int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
-           Position end = rng.getEnd();
-           int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
-           doc.replaceString(startOffset, endOffset, edit.getNewText());
+        List<Function<Void,Void>> fixes = new ArrayList<>();
+        for(int i = edits.size() - 1; i >= 0; i--) {
+            TextEdit edit = edits.get(i);
+            Range rng = edit.getRange();
+            Position start = rng.getStart();
+            int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
+            Position end = rng.getEnd();
+            int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
+            fixes.add(0, (v) -> {
+             doc.replaceString(startOffset, endOffset, edit.getNewText());
+             return null; });
         }
+        fixes.forEach(f -> f.apply(null));
     }
 
     private void setSelection(String file, Range range){

@@ -64,7 +64,8 @@ public class Util {
     public static void applyEdit(String file, List<TextEdit> edits) {
         VirtualFile vf = getVirtualFile(file);
         Document doc = FileDocumentManager.getInstance().getDocument(vf);
-        for(TextEdit edit : edits) {
+        for(int i = edits.size()-1; i >= 0; i--) {
+            TextEdit edit = edits.get(i);
             Range rng = edit.getRange();
             Position start = rng.getStart();
             int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
