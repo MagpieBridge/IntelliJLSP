@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="013b7a03-4af3-42b2-bda2-df133cde2e26" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MagpieBridgeLSP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/MagpieBridgeLSP.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/resources/META-INF/plugin.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/org/magpiebridge/intellij/client/LanguageClient.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,7 +60,6 @@
   <component name="ProjectId" id="1SRlvUmiT0TDvi6rOa92hkDND90" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
@@ -67,11 +72,11 @@
     <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1568922258694" />
     <property name="extract.method.default.visibility" value="private" />
     <property name="jdk.selected.JAVA_MODULE" value="1.8" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../wamt-language-server/src/main/resources/examples" />
-    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="last_opened_file_path" value="$USER_HOME$/local/IntelliJ IDEA 2020.1 CE EAP.app/Contents/plugins/Kotlin/kotlinc" />
+    <property name="project.structure.last.edited" value="SDKs" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="org.magpiebridge.intellij.plugin.Configuration" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.language" />
   </component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
@@ -141,13 +146,7 @@
       </map>
     </option>
   </component>
-  <component name="ServiceViewManager">
-    <option name="viewStates">
-      <list>
-        <serviceView />
-      </list>
-    </option>
-  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="project-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -175,19 +174,22 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="489" y="244" key="FileChooserDialogImpl" timestamp="1592270107461">
+    <state x="409" y="243" key="#com.intellij.util.ui.classpath.ChooseLibrariesDialog" timestamp="1592950325646">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="489" y="244" key="FileChooserDialogImpl/0.0.1440.900@0.0.1440.900" timestamp="1592270107461" />
+    <state x="409" y="243" key="#com.intellij.util.ui.classpath.ChooseLibrariesDialog/0.0.1440.900@0.0.1440.900" timestamp="1592950325646" />
+    <state x="489" y="244" key="FileChooserDialogImpl" timestamp="1592950609482">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="489" y="244" key="FileChooserDialogImpl/0.0.1440.900@0.0.1440.900" timestamp="1592950609482" />
     <state width="1113" height="190" key="GridCell.Tab.0.bottom" timestamp="1592788630441">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
@@ -240,10 +242,10 @@
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="245" y="249" key="IDE.errors.dialog/0.0.1440.900@0.0.1440.900" timestamp="1592679355711" />
-    <state x="159" y="138" key="SettingsEditor" timestamp="1592531569152">
+    <state x="159" y="63" key="SettingsEditor" timestamp="1592950626755">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="159" y="138" key="SettingsEditor/0.0.1440.900@0.0.1440.900" timestamp="1592531569152" />
+    <state x="159" y="63" key="SettingsEditor/0.0.1440.900@0.0.1440.900" timestamp="1592950626755" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
