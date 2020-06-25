@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'magpiebrigde.intellij'
-version '1.0'
+version '1.1'
 
 repositories {
     mavenCentral()
@@ -22,7 +22,8 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
+      Requires 2019.2+<br/>
+      Supports 2020.2 EAP
+    """
     untilBuild null
 }
