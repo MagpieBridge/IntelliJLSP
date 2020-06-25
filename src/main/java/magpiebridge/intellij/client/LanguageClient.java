@@ -171,12 +171,12 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         VirtualFile vf = Util.getVirtualFile(file);
         Document doc = FileDocumentManager.getInstance().getDocument(vf);
         for(TextEdit edit : edits) {
-           Range rng = edit.getRange();
-           Position start = rng.getStart();
-           int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
-           Position end = rng.getEnd();
-           int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
-           doc.replaceString(startOffset, endOffset, edit.getNewText());
+            Range rng = edit.getRange();
+            Position start = rng.getStart();
+            int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
+            Position end = rng.getEnd();
+            int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
+            doc.replaceString(startOffset, endOffset, edit.getNewText());
         }
     }
 
@@ -204,7 +204,7 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
     @Override
     public CompletableFuture<ApplyWorkspaceEditResponse> applyEdit(ApplyWorkspaceEditParams params) {
         WriteCommandAction.runWriteCommandAction(project, () ->
-            params.getEdit().getChanges().forEach((file, edits) -> applyEdit(file, edits)));
+                params.getEdit().getChanges().forEach((file, edits) -> applyEdit(file, edits)));
         ApplyWorkspaceEditResponse ret = new ApplyWorkspaceEditResponse();
         ret.setApplied(true);
         return CompletableFuture.completedFuture(ret);
@@ -319,10 +319,10 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         WriteCommandAction.runWriteCommandAction(project, () -> {
             MarkupModel markup = editor.getMarkupModel();
             markup.addRangeHighlighter(startOffset,
-                endOffset,
-                HighlighterLayer.WEAK_WARNING,
-                attr,
-                HighlighterTargetArea.EXACT_RANGE);
+                    endOffset,
+                    HighlighterLayer.WEAK_WARNING,
+                    attr,
+                    HighlighterTargetArea.EXACT_RANGE);
         });
 
         EditorMouseMotionListener l;
@@ -475,7 +475,6 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                         messageParams.getMessage(),
                         messageParams.getType().toString(),
                         Messages.getInformationIcon());
-
  */
             }
         });

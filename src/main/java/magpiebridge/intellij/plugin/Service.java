@@ -275,8 +275,8 @@ public class Service {
                                         }
                                     });
 
-
-                                    server.getTextDocumentService().hover(pos).thenAccept(h -> {
+                                    HoverParams hov = new HoverParams(id,mp);
+                                    server.getTextDocumentService().hover(hov).thenAccept(h -> {
                                         if (h != null) {
                                             String text = "";
                                             if (h.getContents().isLeft()) {

@@ -40,12 +40,12 @@ public class EchoServer implements LanguageServer, LanguageClientAware {
     public TextDocumentService getTextDocumentService() {
         return new TextDocumentService() {
             @Override
-            public CompletableFuture<Hover> hover(TextDocumentPositionParams position) {
-                if (position.getPosition().getLine() > 15 && position.getPosition().getCharacter()> 10) {
+            public CompletableFuture<Hover> hover(HoverParams hoverParams) {
+                if (hoverParams.getPosition().getLine() > 15 && hoverParams.getPosition().getCharacter()> 10) {
                     Hover h = new Hover();
                     Range r = new Range();
-                    r.setStart(position.getPosition());
-                    r.setEnd(position.getPosition());
+                    r.setStart(hoverParams.getPosition());
+                    r.setEnd(hoverParams.getPosition());
                     h.setRange(r);
                     MarkupContent m = new MarkupContent();
                     m.setKind("text/html");
