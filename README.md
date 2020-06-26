@@ -16,8 +16,6 @@ This is a IntelliJ Plugin which supports the language server protocol. It is mad
 - `Jar file path`: path to your language server jar file
 - `Program arguments`: arguements for your language server.
 - `Working directory (optional)`: directory where the server should observe. If not set, the default is the root path of the current opening project in the IDE. 
-## Contact 
-&#x2709; linghui[at]outlook.de
 
 ## Build from Source
 To build/run the Project from source, import it as a gradle Project into IntelliJ.
@@ -25,3 +23,6 @@ To build/run the Project from source, import it as a gradle Project into Intelli
 To run the plugin from Source, run `Gradle >> Tasks >> intelliJ >> runIde`.
 
 To build the plugin artifact, run `Gradle >> Tasks >> intelliJ >> buildPlugin`.
+
+## Contact 
+&#x2709; linghui[at]outlook.de
