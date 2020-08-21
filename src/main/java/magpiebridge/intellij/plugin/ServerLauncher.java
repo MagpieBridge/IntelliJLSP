@@ -141,6 +141,7 @@ public class ServerLauncher {
             }
             // relaunch servers with new settings
             projects.forEach(ServerLauncher::launch);
+            projects.forEach(project -> Notifications.Bus.notify(new Notification("lsp", "Info", "LSP Connection reloaded", NotificationType.INFORMATION), project) );
         }).start();
     }
 
