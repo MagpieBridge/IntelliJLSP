@@ -37,7 +37,7 @@ public class Util {
 
     public static Document getDocument(VirtualFile vf) {
         Document[] hack = new Document[1];
-        ReadAction.run(() -> { hack[0] = FileDocumentManager.getInstance().getDocument(vf); });
+        ReadAction.run(() -> hack[0] = FileDocumentManager.getInstance().getDocument(vf));
         return hack[0];
     }
 

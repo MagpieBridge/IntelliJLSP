@@ -5,11 +5,11 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.apache.xmlbeans.impl.jam.JComment;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -33,7 +33,7 @@ public class Configuration implements Configurable {
 
     private JTextField jarField;
     private JTextField cpField;
-    private JTextField mainField;
+    private JTextField mcField;
     private JTextField argsField;
     private JTextField dirField;
     private JTextField jvmField;
@@ -41,6 +41,7 @@ public class Configuration implements Configurable {
     private JTextField hostField;
     private JTextField portField;
     private JRadioButton socketButton;
+    private JRadioButton commandOneRadio;
 
     private boolean isModified = false;
 
@@ -76,7 +77,6 @@ public class Configuration implements Configurable {
         DocumentListener dl = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-
                 isModified = true;
             }
 
@@ -113,10 +113,19 @@ public class Configuration implements Configurable {
         portField.setEnabled(false);
         portField.getDocument().addDocumentListener(dl);
 
-        stdioButton.setSelected(Channel.STDIO.equals(channel));
-        stdIoPanel.setVisible(Channel.STDIO.equals(channel));
-        socketButton.setSelected(Channel.SOCKET.equals(channel));
-        socketPanel.setVisible(Channel.SOCKET.equals(channel));
+        final boolean isSTDIO = Channel.STDIO.equals(channel);
+        stdioButton.setSelected(isSTDIO);
+        stdIoPanel.setVisible(isSTDIO);
+        socketButton.setSelected(!isSTDIO);
+        socketPanel.setVisible(!isSTDIO);
+
+
+        commandOneRadio = new JRadioButton("Option 1: run java -jar [jar file path] [program arguments]");
+        JRadioButton commandTwoRadio = new JRadioButton("Option 2: run java -cp [class path] [main class] [program arguments]");
+
+        final boolean isCommandOne = jarPath.isEmpty();
+        commandOneRadio.setSelected( isCommandOne);
+        commandTwoRadio.setSelected( !isCommandOne);
 
         stdioButton.addChangeListener(a->{
             JRadioButton b=(JRadioButton)a.getSource();
@@ -125,7 +134,6 @@ public class Configuration implements Configurable {
             stdIoPanel.setVisible(b.isSelected());
             hostField.setEnabled(!b.isSelected());
             portField.setEnabled(!b.isSelected());
-
             isModified = true;
         });
 
@@ -140,12 +148,8 @@ public class Configuration implements Configurable {
         });
 
 
-
         hostField.setEnabled(socketButton.isSelected());
         portField.setEnabled(socketButton.isSelected());
-
-
-
 
 
         channelPanel.add(channelLabel);
@@ -200,8 +204,9 @@ public class Configuration implements Configurable {
         pathPanel.add(pathField);
         stdIoPanel.add(pathPanel);
 
-        JComponent commandText1=new JLabel("Option 1: run java -jar [jar file path] [program arguments]");
-        stdIoPanel.add(commandText1);
+        JPanel optOnePanel = new JPanel();
+
+        stdIoPanel.add(commandOneRadio);
 
 
         JPanel jarPanel=new JPanel();
@@ -220,7 +225,7 @@ public class Configuration implements Configurable {
                             true,
                             true,
                             false,
-                            false).withTitle("Select a Jar file"),
+                            false).withTitle("Select a Jar File"),
                     stdIoPanel,
                     null,
                     null);
@@ -229,10 +234,10 @@ public class Configuration implements Configurable {
             }
         });
         jarPanel.add(selectJarButton);
-        stdIoPanel.add(jarPanel);
+        optOnePanel.add(jarPanel);
+        stdIoPanel.add(optOnePanel);
+        stdIoPanel.add(commandTwoRadio);
 
-        JComponent commandText2=new JLabel("Option 2: run java -cp [class path] [main class] [program arguments]");
-        stdIoPanel.add(commandText2);
 
         JPanel cpPanel=new JPanel();
         cpPanel.setLayout(flowLayout);
@@ -248,9 +253,9 @@ public class Configuration implements Configurable {
         mcPanel.setLayout(flowLayout);
         JComponent mainText = new JLabel("Main class");
         mcPanel.add(mainText);
-        mainField = new JTextField(mainClass, 50);
-        mainField.getDocument().addDocumentListener(dl);
-        mcPanel.add(mainField);
+        mcField = new JTextField(mainClass, 50);
+        mcField.getDocument().addDocumentListener(dl);
+        mcPanel.add(mcField);
         stdIoPanel.add(mcPanel);
 
         JComponent argsText = new JLabel("Program arguments");
@@ -269,6 +274,23 @@ public class Configuration implements Configurable {
         mainPanel.add(stdIoPanel);
         mainPanel.add(Box.createVerticalGlue());
 
+        final ChangeListener commandOptionChangeListener = click -> {
+            boolean isRadioOne = click.getSource() == commandOneRadio;
+            boolean selected = ((JRadioButton) click.getSource()).isSelected();
+            if( isRadioOne ){
+                commandTwoRadio.setSelected( !selected );
+            }else{
+                commandOneRadio.setSelected( !selected);
+                selected = !selected;
+            }
+            jarField.setEnabled(selected);
+            cpField.setEnabled(!selected);
+            mcField.setEnabled(!selected);
+        };
+        commandOneRadio.addChangeListener(commandOptionChangeListener);
+        commandTwoRadio.addChangeListener(commandOptionChangeListener);
+
+
         return mainPanel;
     }
 
@@ -281,9 +303,12 @@ public class Configuration implements Configurable {
     public void apply() {
         PropertiesComponent pc = PropertiesComponent.getInstance();
         pc.setValue(JVM, jvmField.getText());
-        pc.setValue(JAR, jarField.getText());
-        pc.setValue(CP, cpField.getText());
-        pc.setValue(MAIN, mainField.getText());
+        if(  commandOneRadio.isSelected()){
+            pc.setValue(JAR, jarField.getText());
+        }else {
+            pc.setValue(CP, cpField.getText());
+            pc.setValue(MAIN, mcField.getText());
+        }
         pc.setValue(ARGS, argsField.getText());
         pc.setValue(DIR, dirField.getText());
         pc.setValue(PATH, pathField.getText());
@@ -291,9 +316,13 @@ public class Configuration implements Configurable {
             pc.setValue(CHANNEL, Channel.SOCKET);
             pc.setValue(HOST, hostField.getText());
             pc.setValue(PORT, portField.getText());
-        } else
+        } else {
             pc.setValue(CHANNEL, Channel.STDIO);
+        }
         isModified = false;
+
         ServerLauncher.reload();
     }
+
+
 }
