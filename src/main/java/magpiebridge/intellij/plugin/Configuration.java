@@ -30,6 +30,8 @@ public class Configuration implements Configurable {
     protected static final String HOST="lsp.host";
     protected static final String PORT="lsp.port";
     protected static final String PATH ="PATH";
+    protected static final String COMMANDOPTION = "lsp.commandoption";
+
 
     private JTextField jarField;
     private JTextField cpField;
@@ -303,12 +305,10 @@ public class Configuration implements Configurable {
     public void apply() {
         PropertiesComponent pc = PropertiesComponent.getInstance();
         pc.setValue(JVM, jvmField.getText());
-        if(  commandOneRadio.isSelected()){
-            pc.setValue(JAR, jarField.getText());
-        }else {
-            pc.setValue(CP, cpField.getText());
-            pc.setValue(MAIN, mcField.getText());
-        }
+        pc.setValue(COMMANDOPTION, commandOneRadio.isSelected() );
+        pc.setValue(JAR, jarField.getText());
+        pc.setValue(CP, cpField.getText());
+        pc.setValue(MAIN, mcField.getText());
         pc.setValue(ARGS, argsField.getText());
         pc.setValue(DIR, dirField.getText());
         pc.setValue(PATH, pathField.getText());

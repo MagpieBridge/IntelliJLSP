@@ -53,6 +53,8 @@ public class ServerLauncher {
         String jvm = pc.getValue(Configuration.JVM);
         String host = pc.getValue(Configuration.HOST);
         String port = pc.getValue(Configuration.PORT);
+        boolean commandOptionOne = pc.getBoolean(Configuration.COMMANDOPTION);
+
         ProcessBuilder proc = new ProcessBuilder();
         proc.environment().put("PATH",newPath);
         if (dir != null && !dir.isEmpty()) {
@@ -71,9 +73,11 @@ public class ServerLauncher {
         if (Channel.STDIO.equals(channel)) {
             List<String> args = new ArrayList<>();
             args.add(jvm);
-            if (jarPath != null && !jarPath.isEmpty()) {
-                args.add("-jar");
-                args.add(jarPath);
+            if ( commandOptionOne ) {
+                if (jarPath != null && !jarPath.isEmpty()){
+                    args.add("-jar");
+                    args.add(jarPath);
+                }
             } else {
                 if (cpPath != null && !cpPath.isEmpty()) {
                     args.add("-cp");
