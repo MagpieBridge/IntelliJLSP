@@ -206,8 +206,6 @@ public class Configuration implements Configurable {
         pathPanel.add(pathField);
         stdIoPanel.add(pathPanel);
 
-        JPanel optOnePanel = new JPanel();
-
         stdIoPanel.add(commandOneRadio);
 
 
@@ -236,8 +234,7 @@ public class Configuration implements Configurable {
             }
         });
         jarPanel.add(selectJarButton);
-        optOnePanel.add(jarPanel);
-        stdIoPanel.add(optOnePanel);
+        stdIoPanel.add(jarPanel);
         stdIoPanel.add(commandTwoRadio);
 
 
