@@ -141,7 +141,7 @@ public class Service {
     public Service(Project project, LanguageServer server, LanguageClient lc) {
         this.project = project;
         this.server = server;
-        this.codeActions = project.getComponent(QuickFixes.class);
+        this.codeActions = project.getService(QuickFixes.class);
 
         if (server instanceof LanguageClientAware) {
             ((LanguageClientAware)server).connect(lc);

@@ -1,6 +1,7 @@
 package magpiebridge.intellij.plugin;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import com.intellij.openapi.util.Disposer;
@@ -11,7 +12,8 @@ import java.io.IOException;
 /**
  * Define a project-level LSP service.
  */
-public class ProjectLSPService implements StartupActivity, Disposable {
+@Service
+public final class ProjectLSPService implements StartupActivity, Disposable {
     private Project project;
 
     @Override

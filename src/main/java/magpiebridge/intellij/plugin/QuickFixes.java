@@ -2,6 +2,7 @@ package magpiebridge.intellij.plugin;
 
 import com.intellij.codeInsight.intention.AbstractIntentionAction;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -21,12 +22,12 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-public class QuickFixes extends AbstractIntentionAction {
+@Service
+public final class QuickFixes extends AbstractIntentionAction {
 
     public static class QuickFix {
-        private Either<Command, CodeAction> action;
-
-        private LanguageServer server;
+        private final Either<Command, CodeAction> action;
+        private final LanguageServer server;
 
         public QuickFix(Command action, LanguageServer server) {
             this(Either.forLeft(action), server);
@@ -91,9 +92,7 @@ public class QuickFixes extends AbstractIntentionAction {
        int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
 
        List<QuickFix> fixes = new ArrayList<>();
-       lenses.forEach(c ->  {
-           fixes.add(new QuickFix(c, server));
-       });
+       lenses.forEach(c -> fixes.add(new QuickFix(c, server)));
 
         IPopupChooserBuilder<QuickFix> popup = JBPopupFactory.getInstance().createPopupChooserBuilder(fixes);
 
@@ -127,9 +126,7 @@ public class QuickFixes extends AbstractIntentionAction {
         int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
 
         List<QuickFix> fixes = new ArrayList<>();
-        actions.forEach(c ->  {
-            fixes.add(new QuickFix(c, server));
-        });
+        actions.forEach(c -> fixes.add(new QuickFix(c, server)));
         IPopupChooserBuilder<QuickFix> popup = JBPopupFactory.getInstance().createPopupChooserBuilder(fixes);
 
         if (! lowerBound.containsKey(doc)) { lowerBound.put(doc, new TreeMap<>()); }

@@ -149,9 +149,9 @@ public class ServerLauncher {
         }).start();
     }
 
-    public static void closeProject(Project p) {
-        projects.remove(p);
-        shutDown(p, () -> services.remove(p));
+    public static void closeProject(Project project) {
+        projects.remove(project);
+        shutDown(project, () -> services.remove(project));
     }
 
     public static void shutDown(Project p, Runnable onFinish) {

@@ -26,21 +26,13 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable instance="magpiebridge.intellij.plugin.Configuration"/>
-        <postStartupActivity implementation="magpiebridge.intellij.plugin.ProjectLSPService"/>
+        <postStartupActivity implementation="magpiebridge.intellij.plugin.ProjectStart"/>
         <intentionAction>
             <className>magpiebridge.intellij.plugin.QuickFixes</className>
             <category>SDK intentions</category>
         </intentionAction>
     </extensions>
 
-    <project-components>
-        <component>
-            <implementation-class>magpiebridge.intellij.plugin.QuickFixes</implementation-class>
-        </component>
-        <!--<component>
-            <implementation-class>magpiebridge.intellij.plugin.ProjectLSPService</implementation-class>
-        </component>-->
-    </project-components>
 
     <actions>
         <!-- Add your actions here -->
