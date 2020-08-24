@@ -14,7 +14,6 @@ import java.io.IOException;
 public class ProjectLSPService implements StartupActivity, Disposable {
     private Project project;
 
-
     @Override
     public void dispose() {
         ServerLauncher.closeProject(project);
@@ -23,7 +22,7 @@ public class ProjectLSPService implements StartupActivity, Disposable {
     @Override
     public void runActivity(@NotNull Project project) {
         this.project = project;
-        Disposer.register(project, this::dispose);
+        Disposer.register(project, this);
         ServerLauncher.launch(project);
     }
 }

@@ -356,7 +356,7 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                             info.sort(Comparator.comparingInt(d -> d.getLocation().getRange().getStart().getLine()));
                             info.forEach(d->{
                                 String fileName = d.getLocation().getUri();
-                                String[] pathParts = fileName.split("/|\\\\");
+                                String[] pathParts = fileName.split("[/\\\\]");
                                 fileName = pathParts[pathParts.length-1];
                                 Range codeRange = d.getLocation().getRange();
                                 int line=codeRange.getStart().getLine()+1;
@@ -424,7 +424,7 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 
     private void clearMarkup(Editor editor) {
         if (editorListeners.containsKey(editor)) {
-            editorListeners.remove(editor).forEach(l -> editor.removeEditorMouseMotionListener(l));
+            editorListeners.remove(editor).forEach(editor::removeEditorMouseMotionListener);
         }
         WriteCommandAction.runWriteCommandAction(project, () -> {
             MarkupModel markup = editor.getMarkupModel();
