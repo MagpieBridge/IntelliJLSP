@@ -8,9 +8,11 @@ version '1.1'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
+    implementation 'com.github.ballerina-platform:lsp4intellij:master'
     implementation group:'org.eclipse.lsp4j', name: 'org.eclipse.lsp4j', version: '0.9.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

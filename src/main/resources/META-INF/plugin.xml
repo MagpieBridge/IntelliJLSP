@@ -26,21 +26,42 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable instance="magpiebridge.intellij.plugin.Configuration"/>
-        <postStartupActivity implementation="magpiebridge.intellij.plugin.ProjectLSPService"/>
-        <intentionAction>
-            <className>magpiebridge.intellij.plugin.QuickFixes</className>
-            <category>SDK intentions</category>
-        </intentionAction>
+
+        <projectService serviceImplementation="magpiebridge.intellij.plugin.ProjectService"/>
+        <postStartupActivity implementation="magpiebridge.intellij.plugin.ProjectStartActivity"/>
+
+        <!--
+        <completion.contributor implementationClass="org.wso2.lsp4intellij.contributors.LSPCompletionContributor" id="LSPCompletionContributor" language="any"/>
+        -->
+        <externalAnnotator id="LSPAnnotator" language="TEXT"
+                           implementationClass="org.wso2.lsp4intellij.contributors.annotator.LSPAnnotator"/>
+        <gotoSymbolContributor implementation="org.wso2.lsp4intellij.contributors.symbol.LSPSymbolContributor"
+                               id="LSPSymbolContributor"/>
+
+        <!--
+                <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler" id="LSPRenameHandler" order="first"/>
+                <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor" id="LSPRenameProcessor" order="first"/>
+        -->
+        <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler" id="LSPTypedHandler"/>
+
     </extensions>
 
-    <project-components>
+
+    <actions>
+        <!--
+                <action class="org.wso2.lsp4intellij.actions.LSPReformatAction" id="ReformatCode" use-shortcut-of="ReformatCode" overrides="true" text="Reformat Code"/>
+                <action class="org.wso2.lsp4intellij.actions.LSPShowReformatDialogAction" id="ShowReformatFileDialog" use-shortcut-of="ShowReformatFileDialog" overrides="true" text="Show Reformat File Dialog"/>
+        -->
+        <action class="org.wso2.lsp4intellij.actions.LSPReferencesAction" id="LSPFindUsages">
+            <keyboard-shortcut first-keystroke="shift alt F7" keymap="$default"/>
+        </action>
+    </actions>
+
+    <application-components>
         <component>
-            <implementation-class>magpiebridge.intellij.plugin.QuickFixes</implementation-class>
+            <implementation-class>org.wso2.lsp4intellij.IntellijLanguageClient</implementation-class>
         </component>
-        <!--<component>
-            <implementation-class>magpiebridge.intellij.plugin.ProjectLSPService</implementation-class>
-        </component>-->
-    </project-components>
+    </application-components>
 
     <actions>
         <!-- Add your actions here -->

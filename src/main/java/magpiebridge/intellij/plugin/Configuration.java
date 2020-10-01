@@ -1,6 +1,7 @@
 package magpiebridge.intellij.plugin;
 
 import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
@@ -20,16 +21,17 @@ import java.io.File;
  */
 public class Configuration implements Configurable {
 
+    public static final String EXTENSION_PATTERN = "lsp.extensionpattern";
     protected static final String JAR = "lsp.jar";
     protected static final String CP = "java.cp";
     protected static final String MAIN = "main.class";
     protected static final String ARGS = "java.args";
     protected static final String DIR = "java.dir";
     protected static final String JVM = "java.jvm";
-    protected static final String CHANNEL="lsp.channel";
-    protected static final String HOST="lsp.host";
-    protected static final String PORT="lsp.port";
-    protected static final String PATH ="PATH";
+    protected static final String CHANNEL = "lsp.channel";
+    protected static final String HOST = "lsp.host";
+    protected static final String PORT = "lsp.port";
+    protected static final String PATH = "PATH";
     protected static final String COMMANDOPTION = "lsp.commandoption";
 
 
@@ -60,20 +62,20 @@ public class Configuration implements Configurable {
         String javaHome = System.getProperty("java.home");
         File javaPath = new File(javaHome, "bin/java");
         String jvm = pc.getValue(JVM, javaPath.getAbsolutePath());
-        String path= pc. getValue(PATH, System.getenv("PATH"));
+        String path = pc.getValue(PATH, System.getenv("PATH"));
         String jarPath = pc.getValue(JAR, "");
         String cpPath = pc.getValue(CP, "");
         String mainClass = pc.getValue(MAIN, "");
         String args = pc.getValue(ARGS, "");
         String dir = pc.getValue(DIR, "");
-        String host=pc.getValue(HOST, "");
-        String port=pc.getValue(PORT,"");
+        String host = pc.getValue(HOST, "127.0.0.1");
+        String port = pc.getValue(PORT, "8042");
         String channel = pc.getValue(CHANNEL, Channel.STDIO);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        FlowLayout flowLayout= new FlowLayout();
+        FlowLayout flowLayout = new FlowLayout();
         flowLayout.setAlignment(FlowLayout.LEFT);
 
         DocumentListener dl = new DocumentListener() {
@@ -318,7 +320,7 @@ public class Configuration implements Configurable {
         }
         isModified = false;
 
-        ServerLauncher.reload();
+        ServiceManager.getService(ProjectService.class).restartServerConnection();
     }
 
 
