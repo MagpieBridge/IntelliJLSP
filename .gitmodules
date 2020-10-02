@@ -1,0 +1,3 @@
+[submodule "lib/lsp4intellij"]
+	path = lib/lsp4intellij
+	url = https://github.com/ballerina-platform/lsp4intellij.git
