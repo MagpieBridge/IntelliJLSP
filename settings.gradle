@@ -1,2 +1,2 @@
 rootProject.name = 'MagpieBridgeLSPSupport'
-
+include 'lib:lsp4intellij'
