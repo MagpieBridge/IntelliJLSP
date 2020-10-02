@@ -3,18 +3,12 @@ package magpiebridge.intellij.test;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.project.Project;
-import magpiebridge.intellij.client.LanguageClient;
-import org.eclipse.lsp4j.*;
-
-import java.util.Collections;
 
 public class TestApplyEdit extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
+        /*
         Project project = e.getData(PlatformDataKeys.PROJECT);
         FileEditor editor = e.getData(PlatformDataKeys.FILE_EDITOR);
 
@@ -40,5 +34,7 @@ public class TestApplyEdit extends AnAction {
         params.setEdit(edit);
 
         lc.applyEdit(params);
+
+         */
     }
 }

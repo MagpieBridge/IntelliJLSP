@@ -1,14 +1,8 @@
 package magpiebridge.intellij.test;
 
+
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.project.Project;
-import magpiebridge.intellij.client.LanguageClient;
-import org.eclipse.lsp4j.MessageActionItem;
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
-import org.eclipse.lsp4j.ShowMessageRequestParams;
 
 import java.util.Arrays;
 
@@ -20,7 +14,7 @@ public class TestMessages extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        Project project = e.getData(PlatformDataKeys.PROJECT);
+/*        Project project = e.getData(PlatformDataKeys.PROJECT);
 
         EchoServer server = new EchoServer();
         LanguageClient lc = new LanguageClient(project, server);
@@ -47,5 +41,6 @@ public class TestMessages extends AnAction {
         });
 
         lc.showMessage(sm);
+ */
     }
 }

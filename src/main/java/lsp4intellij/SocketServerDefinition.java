@@ -14,8 +14,8 @@ public class SocketServerDefinition extends LanguageServerDefinition {
   private int port;
 
   public SocketServerDefinition(String ext, String host, int port) {
-    this.languageIds = Collections.emptyMap();
     this.ext = ext;
+    this.languageIds = Collections.emptyMap();
 
     this.host = host;
     this.port = port;

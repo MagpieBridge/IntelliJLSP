@@ -4,12 +4,28 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.project.Project;
+import lsp4intellij.extension.MyLanguageClient;
 import lsp4intellij.MyRawCommandServerDefinition;
 import lsp4intellij.SocketServerDefinition;
+import lsp4intellij.extension.MyRequestManager;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
+import org.wso2.lsp4intellij.client.ClientContext;
+import org.wso2.lsp4intellij.client.languageserver.ServerOptions;
+import org.wso2.lsp4intellij.client.languageserver.requestmanager.DefaultRequestManager;
+import org.wso2.lsp4intellij.client.languageserver.requestmanager.RequestManager;
 import org.wso2.lsp4intellij.client.languageserver.serverdefinition.LanguageServerDefinition;
-import org.wso2.lsp4intellij.client.languageserver.serverdefinition.RawCommandServerDefinition;
+import org.wso2.lsp4intellij.client.languageserver.wrapper.LanguageServerWrapper;
+import org.wso2.lsp4intellij.editor.EditorEventManager;
+import org.wso2.lsp4intellij.extensions.LSPExtensionManager;
+import org.wso2.lsp4intellij.listeners.EditorMouseListenerImpl;
+import org.wso2.lsp4intellij.listeners.EditorMouseMotionListenerImpl;
+import org.wso2.lsp4intellij.listeners.LSPCaretListenerImpl;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,7 +36,7 @@ public class ServerLauncher {
 
 
   static void stop(Project project) {
-
+    // TODO: close connection
   }
 
 
@@ -100,6 +116,29 @@ public class ServerLauncher {
       serverDefinition = new SocketServerDefinition(lspLanugageExtensionPattern, host, port);
     }
 
+    /*
+    IntellijLanguageClient.addExtensionManager(lspLanugageExtensionPattern, new LSPExtensionManager() {
+      @Override
+      public <T extends DefaultRequestManager> T getExtendedRequestManagerFor(LanguageServerWrapper wrapper, LanguageServer server, LanguageClient client, ServerCapabilities serverCapabilities) {
+        return (T) new MyRequestManager(wrapper, server, client, serverCapabilities);
+      }
+
+      @Override
+      public <T extends EditorEventManager> T getExtendedEditorEventManagerFor(Editor editor, DocumentListener documentListener, EditorMouseListenerImpl mouseListener, EditorMouseMotionListenerImpl mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestManager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
+        return (T) new EditorEventManager(editor, documentListener, mouseListener, mouseMotionListener, caretListener, requestManager, serverOptions, wrapper);
+      }
+
+      @Override
+      public Class<? extends LanguageServer> getExtendedServerInterface() {
+        return LanguageServer.class;
+      }
+
+      @Override
+      public LanguageClient getExtendedClientFor(ClientContext context) {
+        return new MyLanguageClient(context);
+      }
+    });
+     */
     IntellijLanguageClient.addServerDefinition(serverDefinition, project);
   }
 

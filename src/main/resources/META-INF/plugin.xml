@@ -46,7 +46,6 @@
 
     </extensions>
 
-
     <actions>
         <!--
                 <action class="org.wso2.lsp4intellij.actions.LSPReformatAction" id="ReformatCode" use-shortcut-of="ReformatCode" overrides="true" text="Reformat Code"/>

@@ -2,22 +2,12 @@ package magpiebridge.intellij.test;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.project.Project;
-import magpiebridge.intellij.plugin.QuickFixes;
-import org.eclipse.lsp4j.*;
-import org.eclipse.lsp4j.services.LanguageServer;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 public class TestQuickFix extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
+        /*
         Project project = e.getData(PlatformDataKeys.PROJECT);
         QuickFixes qf = project.getComponent(QuickFixes.class);
 
@@ -64,5 +54,6 @@ public class TestQuickFix extends AnAction {
         QuickFixes.QuickFix qf3 = new QuickFixes.QuickFix(cwe, server);
 
         qf.addFix(doc, r, qf1, qf2, qf3);
+         */
     }
 }

@@ -35,4 +35,8 @@ public final class ProjectService implements Disposable {
   public void dispose() {
     stopServerConnection();
   }
+
+  public Project getProject() {
+    return project;
+  }
 }
