@@ -44,6 +44,7 @@
         -->
         <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler" id="LSPTypedHandler"/>
 
+
     </extensions>
 
     <actions>
@@ -55,12 +56,6 @@
             <keyboard-shortcut first-keystroke="shift alt F7" keymap="$default"/>
         </action>
     </actions>
-
-    <application-components>
-        <component>
-            <implementation-class>org.wso2.lsp4intellij.IntellijLanguageClient</implementation-class>
-        </component>
-    </application-components>
 
     <actions>
         <!-- Add your actions here -->

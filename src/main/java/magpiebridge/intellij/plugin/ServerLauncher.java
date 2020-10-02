@@ -4,6 +4,7 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.project.Project;
@@ -112,34 +113,13 @@ public class ServerLauncher {
         return;
       }
 
-      // TODO: assumes currently that a server instance is already running!
+      // TODO: assumes currently that a server instance is already running! -> dev mode ;)
       serverDefinition = new SocketServerDefinition(lspLanugageExtensionPattern, host, port);
     }
 
-    /*
-    IntellijLanguageClient.addExtensionManager(lspLanugageExtensionPattern, new LSPExtensionManager() {
-      @Override
-      public <T extends DefaultRequestManager> T getExtendedRequestManagerFor(LanguageServerWrapper wrapper, LanguageServer server, LanguageClient client, ServerCapabilities serverCapabilities) {
-        return (T) new MyRequestManager(wrapper, server, client, serverCapabilities);
-      }
-
-      @Override
-      public <T extends EditorEventManager> T getExtendedEditorEventManagerFor(Editor editor, DocumentListener documentListener, EditorMouseListenerImpl mouseListener, EditorMouseMotionListenerImpl mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestManager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
-        return (T) new EditorEventManager(editor, documentListener, mouseListener, mouseMotionListener, caretListener, requestManager, serverOptions, wrapper);
-      }
-
-      @Override
-      public Class<? extends LanguageServer> getExtendedServerInterface() {
-        return LanguageServer.class;
-      }
-
-      @Override
-      public LanguageClient getExtendedClientFor(ClientContext context) {
-        return new MyLanguageClient(context);
-      }
-    });
-     */
-    IntellijLanguageClient.addServerDefinition(serverDefinition, project);
+    final IntellijLanguageClient service = ServiceManager.getService(IntellijLanguageClient.class);
+    service.addServerDefinition(serverDefinition, project);
+    service.init();
   }
 
 
