@@ -38,11 +38,11 @@
         <gotoSymbolContributor implementation="org.wso2.lsp4intellij.contributors.symbol.LSPSymbolContributor"
                                id="LSPSymbolContributor"/>
 
+        <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler" id="LSPTypedHandler"/>
         <!--
                 <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler" id="LSPRenameHandler" order="first"/>
                 <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor" id="LSPRenameProcessor" order="first"/>
         -->
-        <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler" id="LSPTypedHandler"/>
 
 
     </extensions>
@@ -55,9 +55,7 @@
         <action class="org.wso2.lsp4intellij.actions.LSPReferencesAction" id="LSPFindUsages">
             <keyboard-shortcut first-keystroke="shift alt F7" keymap="$default"/>
         </action>
-    </actions>
 
-    <actions>
         <!-- Add your actions here -->
         <!-- group id="magpiebridge.intellij.tests.Tests" text="Tests for LSP support" popup="true">
           <add-to-group group-id="ToolsMenu" anchor="last"/>

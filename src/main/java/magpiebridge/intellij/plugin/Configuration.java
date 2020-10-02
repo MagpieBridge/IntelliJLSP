@@ -27,6 +27,7 @@ public class Configuration implements Configurable {
 
   List<String> configKeys = new ArrayList<>();
   List<String> configValues = new ArrayList<>();
+  List<Integer> modifiedIndices = new ArrayList<>();
 
   protected static final String JAR = "lsp.jar";
   protected static final String CP = "java.cp";
@@ -341,6 +342,8 @@ public class Configuration implements Configurable {
 
         configKeys.add("new.key");
         configValues.add("Value");
+        modifiedIndices.add(configKeys.size());
+
         renderConfigTable(configKeyPanel, configValuePanel);
       });
 
@@ -350,6 +353,7 @@ public class Configuration implements Configurable {
         if (selectedConfigLineKey != null) {
           final int idx = configKeys.indexOf(selectedConfigLineKey);
           if (idx > -1) {
+            modifiedIndices.add(idx);
             configKeys.remove(idx);
             configValues.remove(idx);
           }
@@ -411,9 +415,20 @@ public class Configuration implements Configurable {
     pc.setValue(PORT, portField.getText());
     pc.setValue(CHANNEL, !socketButton.isSelected());
 
-    // custom config
+    /* handle custom config: see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_didChangeConfiguration
+    final Project project = ServiceManager.getService(ProjectService.class).getProject();
+    Map<String, String> settings = new HashMap<>();
+    final @Nullable String[] custom_config_keys = pc.getValues("CUSTOM_CONFIG_KEYS");
+
+    // TODO: diff what changed; rethink: marking modified items by index will have problems with remove();add(); ;)
+    for (int i = 0; i < modifiedIndices.size(); i++) {
+        settings.put( configKeys.get(i), configValues.get(i) );
+    }
+    ServiceManager.getService(IntellijLanguageClient.class).didChangeConfiguration( new DidChangeConfigurationParams( settings ), project);
+
     pc.setValues("CUSTOM_CONFIG_KEYS", configKeys.toArray(new String[0]));
     pc.setValues("CUSTOM_CONFIG_VALUES", configValues.toArray(new String[0]));
+    */
 
     isModified = false;
     ServiceManager.getService(ProjectService.class).restartServerConnection();

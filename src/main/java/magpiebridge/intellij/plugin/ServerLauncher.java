@@ -1,35 +1,21 @@
 package magpiebridge.intellij.plugin;
 
+import com.google.common.collect.Lists;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.project.Project;
-import lsp4intellij.extension.MyLanguageClient;
 import lsp4intellij.MyRawCommandServerDefinition;
 import lsp4intellij.SocketServerDefinition;
-import lsp4intellij.extension.MyRequestManager;
-import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.services.LanguageClient;
-import org.eclipse.lsp4j.services.LanguageServer;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
-import org.wso2.lsp4intellij.client.ClientContext;
-import org.wso2.lsp4intellij.client.languageserver.ServerOptions;
-import org.wso2.lsp4intellij.client.languageserver.requestmanager.DefaultRequestManager;
-import org.wso2.lsp4intellij.client.languageserver.requestmanager.RequestManager;
 import org.wso2.lsp4intellij.client.languageserver.serverdefinition.LanguageServerDefinition;
-import org.wso2.lsp4intellij.client.languageserver.wrapper.LanguageServerWrapper;
-import org.wso2.lsp4intellij.editor.EditorEventManager;
-import org.wso2.lsp4intellij.extensions.LSPExtensionManager;
-import org.wso2.lsp4intellij.listeners.EditorMouseListenerImpl;
-import org.wso2.lsp4intellij.listeners.EditorMouseMotionListenerImpl;
-import org.wso2.lsp4intellij.listeners.LSPCaretListenerImpl;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -119,6 +105,21 @@ public class ServerLauncher {
 
     final IntellijLanguageClient service = ServiceManager.getService(IntellijLanguageClient.class);
     service.addServerDefinition(serverDefinition, project);
+
+    // TODO: [ms] check
+    // assign custom configuration entries
+    final @Nullable String[] custom_config_keys = pc.getValues("CUSTOM_CONFIG_KEYS");
+    final @Nullable String[] custom_config_values = pc.getValues("CUSTOM_CONFIG_VALUES");
+
+    final HashMap<String, String> map = new HashMap<>();
+    if (custom_config_keys != null && custom_config_values != null) {
+      for (int i = 0; i < custom_config_keys.length; i++) {
+        map.put(custom_config_keys[i], custom_config_values[i]);
+      }
+    }
+    service.setConfigParams(Lists.newArrayList(map.entrySet()));
+
+
     service.init();
   }
 
