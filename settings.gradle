@@ -1,2 +1,5 @@
-rootProject.name = 'MagpieBridgeLSPSupport'
-include 'lib:lsp4intellij'
+includeBuild('lib/lsp4intellij') {
+    dependencySubstitution {
+        substitute module('com.github.ballerina-platform:lsp4intellij:master') with project(':')
+    }
+}

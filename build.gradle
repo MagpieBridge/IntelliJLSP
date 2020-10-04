@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.4.21'
+    id 'org.jetbrains.intellij' version '0.4.26'
 }
 
 group 'magpiebrigde.intellij'
@@ -8,12 +8,11 @@ version '1.1'
 
 repositories {
     mavenCentral()
- //   maven { url 'https://jitpack.io' }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-//    implementation 'com.github.ballerina-platform:lsp4intellij:master'
-    implementation project('lib:lsp4intellij')
+    implementation 'com.github.ballerina-platform:lsp4intellij:master'
     implementation group:'org.eclipse.lsp4j', name: 'org.eclipse.lsp4j', version: '0.9.0'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
