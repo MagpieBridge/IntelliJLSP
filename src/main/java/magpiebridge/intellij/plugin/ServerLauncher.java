@@ -21,11 +21,10 @@ import java.util.StringTokenizer;
 
 public class ServerLauncher {
 
-
   static void stop(Project project) {
-    // TODO: close connection
+    final IntellijLanguageClient service = ServiceManager.getService(IntellijLanguageClient.class);
+    service.getAllServerWrappersFor(project.getBasePath()).forEach(w -> w.stop(false));
   }
-
 
   static void start(Project project) {
 
@@ -35,7 +34,8 @@ public class ServerLauncher {
     }
 
     // TODO: [ms] generify (other default) ;)
-    String lspLanugageExtensionPattern = "jimple";// pc.getValue(Configuration.EXTENSION_PATTERN, "jimple");
+    String lspLanguageExtensionPattern = "jimple";
+    // pc.getValue(Configuration.EXTENSION_PATTERN, "jimple");
 
     boolean commandOptionOne = pc.getBoolean(Configuration.COMMANDOPTION);
     LanguageServerDefinition serverDefinition = null;
@@ -88,7 +88,7 @@ public class ServerLauncher {
         args.add(toks.nextToken());
       }
 
-      serverDefinition = new MyRawCommandServerDefinition(lspLanugageExtensionPattern, args.toArray(new String[0]), newPath);
+      serverDefinition = new MyRawCommandServerDefinition(lspLanguageExtensionPattern, args.toArray(new String[0]), newPath);
     } else {
       String host = pc.getValue(Configuration.HOST, "");
       int port = pc.getInt(Configuration.PORT, 0);
@@ -100,7 +100,7 @@ public class ServerLauncher {
       }
 
       // TODO: assumes currently that a server instance is already running! -> dev mode ;)
-      serverDefinition = new SocketServerDefinition(lspLanugageExtensionPattern, host, port);
+      serverDefinition = new SocketServerDefinition(lspLanguageExtensionPattern, host, port);
     }
 
     final IntellijLanguageClient service = ServiceManager.getService(IntellijLanguageClient.class);
@@ -118,7 +118,6 @@ public class ServerLauncher {
       }
     }
     service.setConfigParams(Lists.newArrayList(map.entrySet()));
-
 
     service.init();
   }
