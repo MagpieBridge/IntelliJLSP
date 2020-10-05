@@ -118,8 +118,8 @@ public class ServerLauncher {
       }
     }
     service.setConfigParams(Lists.newArrayList(map.entrySet()));
-
     service.init();
+    service.initProjectConnections(project);
   }
 
 
