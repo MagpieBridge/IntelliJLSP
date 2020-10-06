@@ -121,6 +121,7 @@ public class Configuration implements Configurable {
 
       JPanel filepatternPanel = new JPanel(flowLayout);
       filepatternPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+      filepatternPanel.add(new JLabel("File pattern (extension or regex):"));
       filepatternField = new JTextField(filepattern, 30);
       filepatternPanel.add(filepatternField);
       mainPanel.add(filepatternPanel);
