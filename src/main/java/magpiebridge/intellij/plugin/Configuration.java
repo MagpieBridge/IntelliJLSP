@@ -6,19 +6,19 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
-import java.io.File;
-import java.util.*;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-
-import com.intellij.ui.JBColor;
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.Nullable;
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Configuration for LSP Server.
@@ -29,6 +29,7 @@ public class Configuration implements Configurable {
   List<String> configValues = new ArrayList<>();
   List<Integer> modifiedIndices = new ArrayList<>();
 
+  protected static final String FILEPATTERN = "lsp.filepattern";
   protected static final String JAR = "lsp.jar";
   protected static final String CP = "java.cp";
   protected static final String MAIN = "main.class";
@@ -41,7 +42,8 @@ public class Configuration implements Configurable {
     protected static final String PATH = "PATH";
     protected static final String COMMANDOPTION = "lsp.commandoption";
 
-    private JTextField jarField;
+  private JTextField filepatternField;
+  private JTextField jarField;
     private JTextField cpField;
     private JTextField mcField;
     private JTextField argsField;
@@ -67,6 +69,7 @@ public class Configuration implements Configurable {
     @Override
     public JComponent createComponent() {
       PropertiesComponent pc = PropertiesComponent.getInstance();
+      String filepattern = pc.getValue(FILEPATTERN, ".*");
       String javaHome = System.getProperty("java.home");
       File javaPath = new File(javaHome, "bin/java");
       String jvm = pc.getValue(JVM, javaPath.getAbsolutePath());
@@ -115,6 +118,12 @@ public class Configuration implements Configurable {
                   isModified = true;
                 }
               };
+
+      JPanel filepatternPanel = new JPanel(flowLayout);
+      filepatternPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+      filepatternField = new JTextField(filepattern, 30);
+      filepatternPanel.add(filepatternField);
+      mainPanel.add(filepatternPanel);
 
       JPanel channelPanel = new JPanel(flowLayout);
       JComponent channelLabel = new JLabel("LSP communication channel");
@@ -403,6 +412,7 @@ public class Configuration implements Configurable {
   @Override
   public void apply() {
     PropertiesComponent pc = PropertiesComponent.getInstance();
+    pc.setValue(FILEPATTERN, filepatternField.getText());
     pc.setValue(JVM, jvmField.getText());
     pc.setValue(COMMANDOPTION, commandOneRadio.isSelected());
     pc.setValue(JAR, jarField.getText());

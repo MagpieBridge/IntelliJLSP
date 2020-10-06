@@ -33,10 +33,7 @@ public class ServerLauncher {
       return;
     }
 
-    // TODO: [ms] generify (other default) ;)
-    String lspLanguageExtensionPattern = "jimple";
-    // pc.getValue(Configuration.EXTENSION_PATTERN, "jimple");
-
+    String lspLanguageExtensionPattern = pc.getValue(Configuration.FILEPATTERN, ".*");
     boolean commandOptionOne = pc.getBoolean(Configuration.COMMANDOPTION);
     LanguageServerDefinition serverDefinition = null;
     if (pc.getBoolean(Configuration.CHANNEL)) {
