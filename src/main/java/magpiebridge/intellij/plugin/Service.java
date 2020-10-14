@@ -1,13 +1,28 @@
 package magpiebridge.intellij.plugin;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import com.google.gson.JsonObject;
 import com.intellij.AppTopics;
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.editor.*;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.EditorGutterAction;
+import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.openapi.editor.TextAnnotationGutterProvider;
 import com.intellij.openapi.editor.colors.ColorKey;
 import com.intellij.openapi.editor.colors.EditorFontType;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
@@ -18,25 +33,37 @@ import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.SimpleTimerTask;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
-import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.CodeActionContext;
+import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.CodeLens;
+import org.eclipse.lsp4j.CodeLensParams;
+import org.eclipse.lsp4j.Command;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DidCloseTextDocumentParams;
+import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.HoverParams;
+import org.eclipse.lsp4j.InitializeParams;
+import org.eclipse.lsp4j.InitializedParams;
+import org.eclipse.lsp4j.MarkedString;
+import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextDocumentItem;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.Color;
-import java.awt.*;
-import java.util.*;
-import java.util.List;
-import java.util.Timer;
 
 public class Service {
 
@@ -148,9 +175,7 @@ public class Service {
         }
 
         String rootPath = project.getBasePath();
-        InitializeParams init = new InitializeParams();
-        init.setRootUri(Util.fixUrl(rootPath.startsWith("/")? "file:" + rootPath: "file:///" + rootPath));
-        init.setTrace("verbose");
+        InitializeParams init = createInitializeParams(rootPath);
         server.initialize(init).thenAccept(ir -> {
             assert ir.getCapabilities().getCodeActionProvider().getLeft();
 
@@ -327,6 +352,19 @@ public class Service {
         }
 
         );
+    }
+
+    private InitializeParams createInitializeParams(String rootPath) {
+        //TODO. add other capabilities
+        InitializeParams init = new InitializeParams();
+        init.setRootUri(Util.fixUrl(rootPath.startsWith("/") ? "file:" + rootPath : "file:///" + rootPath));
+        init.setTrace("verbose");
+        ClientCapabilities clientCapabilities = new ClientCapabilities();
+        JsonObject showHTML = new JsonObject();
+        showHTML.addProperty("supportsShowHTML",true);
+        clientCapabilities.setExperimental(showHTML);
+        init.setCapabilities(clientCapabilities);
+        return init;
     }
 
     public void shutDown(Runnable andThen){
