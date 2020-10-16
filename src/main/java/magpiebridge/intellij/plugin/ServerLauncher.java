@@ -102,6 +102,8 @@ public class ServerLauncher {
 
     final IntellijLanguageClient service = ServiceManager.getService(IntellijLanguageClient.class);
     service.addServerDefinition(serverDefinition, project);
+    service.addExtensionManager(serverDefinition.ext, new MagpieLSPExtensionManager());
+
 
     // TODO: [ms] check
     // assign custom configuration entries
