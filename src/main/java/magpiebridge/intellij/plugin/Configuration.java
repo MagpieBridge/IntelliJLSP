@@ -1,5 +1,6 @@
 package magpiebridge.intellij.plugin;
 
+import com.intellij.ide.HelpTooltip;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
@@ -125,6 +126,7 @@ public class Configuration implements Configurable {
       filepatternField = new JTextField(filepattern, 30);
       filepatternPanel.add(filepatternField);
       mainPanel.add(filepatternPanel);
+      new HelpTooltip().setDescription("To match every file use: .*").installOn(filepatternField);
 
       JPanel channelPanel = new JPanel(flowLayout);
       JComponent channelLabel = new JLabel("LSP communication channel");
