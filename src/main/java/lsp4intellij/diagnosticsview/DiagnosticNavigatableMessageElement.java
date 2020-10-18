@@ -13,11 +13,11 @@ import org.wso2.lsp4intellij.utils.FileUtils;
 
 import javax.swing.*;
 
-public class LSPNavigatableMessageElement extends NavigatableMessageElement {
+public class DiagnosticNavigatableMessageElement extends NavigatableMessageElement {
 
   private final DiagnosticRelatedInformation relatedInfo;
 
-  public LSPNavigatableMessageElement(DiagnosticRelatedInformation relatedInfo, GroupingElement group, Project project) {
+  public DiagnosticNavigatableMessageElement(DiagnosticRelatedInformation relatedInfo, GroupingElement group, Project project) {
     super(group.getKind(), group, new String[]{relatedInfo.getMessage(), "new line 1", "new two"}, new LSPNavigatable(project, relatedInfo.getLocation()), "", "");
     this.relatedInfo = relatedInfo;
   }

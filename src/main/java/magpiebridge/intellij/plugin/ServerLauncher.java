@@ -1,7 +1,6 @@
 package magpiebridge.intellij.plugin;
 
 import com.google.common.collect.Lists;
-import com.intellij.analysis.problemsView.toolWindow.ProblemsView;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -9,21 +8,21 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import lsp4intellij.MyRawCommandServerDefinition;
 import lsp4intellij.SocketServerDefinition;
-import lsp4intellij.diagnosticsview.LSPProblemsViewPanel;
+import lsp4intellij.diagnosticsview.DiagnosticsViewPanel;
 import org.eclipse.lsp4j.*;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
 import org.wso2.lsp4intellij.client.languageserver.serverdefinition.LanguageServerDefinition;
+import org.wso2.lsp4intellij.utils.FileUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class ServerLauncher {
 
@@ -133,6 +132,7 @@ public class ServerLauncher {
     diagnostic.setMessage("This is a Jimple Error. ");
     diagnostic.setRange(new Range(new Position(2, 0), new Position(2, 10)));
     diagnostic.setSource("Jimpleparser");
+    diagnostic.setCode("403 Forbidden");
     diagnostic.setSeverity(DiagnosticSeverity.Error);
 
     List<DiagnosticRelatedInformation> related = new ArrayList<>();
@@ -143,17 +143,40 @@ public class ServerLauncher {
 
 
     ApplicationManager.getApplication().invokeLater(() -> {
-      final ContentManager contentManager = ProblemsView.getToolWindow(project).getContentManager();
+
+
+      String fileUri = "file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/helloworld.jimple";
+      final VirtualFile vf = FileUtils.virtualFileFromURI(fileUri);
+
+
+      final ContentManager contentManager = com.intellij.analysis.problemsView.toolWindow.ProblemsView.getToolWindow(project).getContentManager();
       final Content selectedContent = contentManager.getSelectedContent();
 
-      final LSPProblemsViewPanel component = new LSPProblemsViewPanel(project);
-      // TODO: add all diagnostics of that file
-      component.addDiagnostic(diagnostic, "file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/helloworld.jimple");
+
+      /*
+      final DiagnosticGroupingElement groupingElement = new DiagnosticGroupingElement(diagnostic, vf);
+      final List<DiagnosticRelatedInformation> diagnosticRelatedInformations = diagnostic.getRelatedInformation();
+      if (diagnosticRelatedInformations != null && !diagnosticRelatedInformations.isEmpty()) {
+        for (DiagnosticRelatedInformation relatedInformation : diagnosticRelatedInformations) {
+          final UUID sessionId = UUID.randomUUID();
+          ProblemsView.SERVICE.getInstance(project).addMessage(MessageCategory.ERROR, new String[]{diagnostic.getMessage(), "zeile zwei"},diagnostic.getMessage(), new LSPNavigatable(project, vf.toNioPath().toFile(),diagnostic.getRange()),null, null, sessionId);
+          ProblemsView.SERVICE.getInstance(project).addMessage(MessageCategory.ERROR, new String[]{"2"+diagnostic.getMessage(), "2zeile zwei"},diagnostic.getMessage(), new LSPNavigatable(project, vf.toNioPath().toFile(),diagnostic.getRange()),null, "blubb", sessionId);
+        }
+      }
+      */
+
+      final DiagnosticsViewPanel component = new DiagnosticsViewPanel(project);
+      List<Diagnostic> diagnostics = new ArrayList<>(Collections.singletonList(diagnostic));
+      for (Diagnostic diag : diagnostics) {
+        component.addDiagnostic(diag, "file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/helloworld.jimple");
+      }
       component.expandAll();
 
       final Content content = contentManager.getFactory().createContent(component, "Diagnostics", false);
-      selectedContent.getManager().addContent(content);
-      selectedContent.getManager().setSelectedContent(content, true, true);
+      contentManager.addContent(content);
+      contentManager.setSelectedContent(content, true, true);
+      Disposer.register( ServiceManager.getService(IntellijLanguageClient.class) , component);
+
     });
 
   }

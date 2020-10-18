@@ -10,8 +10,8 @@ import org.wso2.lsp4intellij.utils.FileUtils;
 
 import java.util.List;
 
-public final class LSPProblemsViewPanel extends NewErrorTreeViewPanel {
-  public LSPProblemsViewPanel(Project project) {
+public final class DiagnosticsViewPanel extends NewErrorTreeViewPanel {
+  public DiagnosticsViewPanel(Project project) {
     super(project, null);
   }
 
@@ -30,7 +30,7 @@ public final class LSPProblemsViewPanel extends NewErrorTreeViewPanel {
     final List<DiagnosticRelatedInformation> diagnosticRelatedInformations = diagnostic.getRelatedInformation();
     if (diagnosticRelatedInformations != null && !diagnosticRelatedInformations.isEmpty()) {
       for (DiagnosticRelatedInformation relatedInformation : diagnosticRelatedInformations) {
-        errorViewStructure.addNavigatableMessage(diagnostic.getMessage(), new LSPNavigatableMessageElement(relatedInformation, groupingElement, myProject));
+        errorViewStructure.addNavigatableMessage(diagnostic.getMessage(), new DiagnosticNavigatableMessageElement(relatedInformation, groupingElement, myProject));
       }
     }
 

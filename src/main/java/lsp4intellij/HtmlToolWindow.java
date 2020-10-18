@@ -4,6 +4,8 @@ import javax.annotation.Nonnull;
 
 public class HtmlToolWindow {
 
+
+  // for the future: https://jetbrains.org/intellij/sdk/docs/reference_guide/jcef.html
   public static void init() {
     /* FIXME: add javafx to path
     ToolWindow toolWindow = ToolWindowManager.getInstance(project).registerToolWindow("MagpieBridge Control Panel", false, ToolWindowAnchor.BOTTOM);
