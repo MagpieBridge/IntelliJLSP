@@ -426,7 +426,7 @@ public class Configuration implements Configurable {
     pc.setValue(PATH, pathField.getText());
     pc.setValue(HOST, hostField.getText());
     pc.setValue(PORT, portField.getText());
-    pc.setValue(CHANNEL, !socketButton.isSelected());
+    pc.setValue(CHANNEL, !socketButton.isSelected(), true);
 
     /* handle custom config: see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_didChangeConfiguration
     final Project project = ServiceManager.getService(ProjectService.class).getProject();
