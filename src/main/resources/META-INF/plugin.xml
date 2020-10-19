@@ -45,6 +45,9 @@
         -->
 
 
+        <toolWindow id="MagpieHtmlToolWindow" secondary="true" icon="AllIcons.General.Modified" anchor="bottom"
+                    factoryClass="lsp4intellij.HtmlToolWindowFactory"/>
+
     </extensions>
 
     <actions>

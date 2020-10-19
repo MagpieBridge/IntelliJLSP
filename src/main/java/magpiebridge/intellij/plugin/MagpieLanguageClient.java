@@ -1,7 +1,7 @@
 package magpiebridge.intellij.plugin;
 
 import com.google.gson.JsonObject;
-import lsp4intellij.HtmlToolWindow;
+import lsp4intellij.HtmlToolWindowFactory;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.jsonrpc.services.JsonNotification;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -26,6 +26,6 @@ public class MagpieLanguageClient extends DefaultLanguageClient implements Langu
 
   @JsonNotification("magpiebridge/showHTML")
   public void showHTML(String content) {
-    HtmlToolWindow.show(content);
+    HtmlToolWindowFactory.show(content);
   }
 }

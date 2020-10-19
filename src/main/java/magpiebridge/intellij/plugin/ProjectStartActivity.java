@@ -4,7 +4,6 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
-import lsp4intellij.HtmlToolWindow;
 import org.jetbrains.annotations.NotNull;
 
 public class ProjectStartActivity implements StartupActivity, DumbAware {
@@ -13,8 +12,6 @@ public class ProjectStartActivity implements StartupActivity, DumbAware {
   public void runActivity(@NotNull Project project) {
     ServiceManager.getService(ProjectService.class).setProject(project);
     ServerLauncher.start(project);
-
-    HtmlToolWindow.init();
 
   }
 
