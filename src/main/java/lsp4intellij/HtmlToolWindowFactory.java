@@ -18,7 +18,6 @@ import javax.annotation.Nonnull;
 import javax.swing.*;
 
 public final class HtmlToolWindowFactory implements ToolWindowFactory {
-
   private static final String ID = "Magpie Control Panel";
 
   // private static WebView htmlViewer = null;
@@ -32,8 +31,11 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
     if( toolWindow != null) {
       toolWindow.show(() -> {
         if (htmlcontent != null) {
-          // load cached html when users opens the tool window
-          browser.loadHTML(htmlcontent);
+          // load cached html when users opens the tool window -> lazyload
+          ApplicationUtils.invokeLater(() -> {
+            browser.loadHTML(htmlcontent);
+            htmlcontent = null;
+          });
         }
       });
       isHidden = toolWindow.isActive() && !toolWindow.isVisible();
@@ -58,24 +60,18 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
   }
 
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-    init(project);
+    final JComponent brwoserComponent = initBrowser(project);
     ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-    Content content = contentFactory.createContent( getComponent(), "", false);
+    Content content = contentFactory.createContent( brwoserComponent, "", false);
     toolWindow.getContentManager().addContent(content);
   }
 
-  private static void showUiUpdate(Project project){
-    ToolWindowManager.getInstance(project).notifyByBalloon(HtmlToolWindowFactory.ID, MessageType.INFO ,"Update" );
-  }
-
-  static JComponent getComponent(){
-    return browser.getComponent();
-  }
-
-  public static void init(@NotNull Project project) {
+  static JComponent initBrowser(@NotNull Project project) {
     browser = new JBCefBrowser();
     browser.loadHTML(htmlcontent != null ? htmlcontent : "<html> Nothing to show. </html>");
     Disposer.register(ServiceManager.getService(IntellijLanguageClient.class), browser);
+
+    return browser.getComponent();
 
     /*
     ToolWindow toolWindow = ToolWindowManager.getInstance(project).registerToolWindow(HtmlToolWindowFactory.ID, false, ToolWindowAnchor.BOTTOM);
@@ -93,8 +89,15 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
       root.getChildren().add(htmlViewer);
       fxPanel.setScene(scene);
     });
-    component.getParent().add(fxPanel);
+    return fxPanel;
     */
 
+  }
+
+  private static void showUiUpdate(Project project){
+    final ToolWindowManager instance = ToolWindowManager.getInstance(project);
+    if( instance.canShowNotification(HtmlToolWindowFactory.ID)) {
+      instance.notifyByBalloon(HtmlToolWindowFactory.ID, MessageType.INFO, "Update");
+    }
   }
 }
