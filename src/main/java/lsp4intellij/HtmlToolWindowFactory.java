@@ -60,9 +60,9 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
   }
 
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-    final JComponent brwoserComponent = initBrowser(project);
+    final JComponent browserComponent = initBrowser(project);
     ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-    Content content = contentFactory.createContent( brwoserComponent, "", false);
+    Content content = contentFactory.createContent( browserComponent, "", false);
     toolWindow.getContentManager().addContent(content);
   }
 
