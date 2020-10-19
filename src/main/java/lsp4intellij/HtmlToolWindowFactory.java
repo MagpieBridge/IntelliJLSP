@@ -19,15 +19,28 @@ import javax.swing.*;
 
 public final class HtmlToolWindowFactory implements ToolWindowFactory {
 
+  private static final String ID = "Magpie Control Panel";
+
   // private static WebView htmlViewer = null;
   private static JBCefBrowser browser = null;
   private static String htmlcontent = null;
 
   public static void show(@Nonnull Project project, @Nonnull String content) {
 
-    // tool window not initialized/created yet?
-    // TODO: or hidden -> lazyload: update HTML when user opens the panel
-    if( browser == null){
+    boolean isHidden = true;
+    final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(HtmlToolWindowFactory.ID);
+    if( toolWindow != null) {
+      toolWindow.show(() -> {
+        if (htmlcontent != null) {
+          // load cached html when users opens the tool window
+          browser.loadHTML(htmlcontent);
+        }
+      });
+      isHidden = toolWindow.isActive() && !toolWindow.isVisible();
+    }
+
+    // not initialized/opened yet or hidden -> lazyload: update HTML when user opens the panel
+    if( browser == null || isHidden){
       htmlcontent = content;
       showUiUpdate(project);
     }else {
@@ -52,7 +65,7 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
   }
 
   private static void showUiUpdate(Project project){
-    ToolWindowManager.getInstance(project).notifyByBalloon("Magpie Control Panel", MessageType.INFO ,"Update" );
+    ToolWindowManager.getInstance(project).notifyByBalloon(HtmlToolWindowFactory.ID, MessageType.INFO ,"Update" );
   }
 
   static JComponent getComponent(){
@@ -65,7 +78,7 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
     Disposer.register(ServiceManager.getService(IntellijLanguageClient.class), browser);
 
     /*
-    ToolWindow toolWindow = ToolWindowManager.getInstance(project).registerToolWindow("MagpieBridge Control Panel", false, ToolWindowAnchor.BOTTOM);
+    ToolWindow toolWindow = ToolWindowManager.getInstance(project).registerToolWindow(HtmlToolWindowFactory.ID, false, ToolWindowAnchor.BOTTOM);
     toolWindow.getComponent().add( browser.getComponent());
 
     JFXPanel fxPanel = new JFXPanel();
