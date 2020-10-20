@@ -17,8 +17,9 @@ import org.wso2.lsp4intellij.utils.ApplicationUtils;
 import javax.annotation.Nonnull;
 import javax.swing.*;
 
+// [ms] hint: if we implement a Condition class and reference in plugin.xml we can show the tab only if there is sth to show.
 public final class HtmlToolWindowFactory implements ToolWindowFactory {
-  private static final String ID = "Magpie Control Panel";
+  private static final String ID = "Magpie Control Panel";    // needs to be the same as in plugin.xml
 
   // private static WebView htmlViewer = null;
   private static JBCefBrowser browser = null;
