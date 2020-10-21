@@ -9,6 +9,7 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
 import org.jetbrains.annotations.NotNull;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
@@ -61,14 +62,19 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
   }
 
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-    final JComponent browserComponent = initBrowser(project);
-    ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-    Content content = contentFactory.createContent( browserComponent, "", false);
-    toolWindow.getContentManager().addContent(content);
-  }
+      final JComponent browserComponent;
+      if (JBCefApp.isSupported()) {
+        browserComponent = initBrowser(project);
+      }else{
+        browserComponent = new JLabel("JCEF Client is not supported in your IDE. Please Upgrade.");
+      }
+      ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+      Content content = contentFactory.createContent(browserComponent, "", false);
+      toolWindow.getContentManager().addContent(content);
+    }
 
-  static JComponent initBrowser(@NotNull Project project) {
-    browser = new JBCefBrowser();
+    static JComponent initBrowser(@NotNull Project project) {
+      browser = new JBCefBrowser();
     browser.loadHTML(htmlcontent != null ? htmlcontent : "<html> Nothing to show. </html>");
     Disposer.register(ServiceManager.getService(IntellijLanguageClient.class), browser);
 
