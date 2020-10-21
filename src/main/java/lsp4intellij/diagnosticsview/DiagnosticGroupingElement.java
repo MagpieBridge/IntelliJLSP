@@ -36,6 +36,7 @@ public final class DiagnosticGroupingElement extends GroupingElement {
     return ErrorTreeElementKind.GENERIC;
   }
 
+
   @Override
   public CustomizeColoredTreeCellRenderer getLeftSelfRenderer() {
     return new CustomizeColoredTreeCellRenderer() {
@@ -76,7 +77,11 @@ public final class DiagnosticGroupingElement extends GroupingElement {
                                         int row,
                                         boolean hasFocus) {
         renderer.append(diag.getSource(), SimpleTextAttributes.GRAYED_ATTRIBUTES);
+        renderer.setOpaque(true);
+        renderer.setTransparentIconBackground(true);
       }
     };
   }
+
+
 }

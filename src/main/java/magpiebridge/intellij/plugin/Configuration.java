@@ -40,22 +40,22 @@ public class Configuration implements Configurable {
   protected static final String CHANNEL = "lsp.channel";
   protected static final String HOST = "lsp.host";
   protected static final String PORT = "lsp.port";
-    protected static final String PATH = "PATH";
-    protected static final String COMMANDOPTION = "lsp.commandoption";
+  protected static final String PATH = "PATH";
+  protected static final String COMMANDOPTION = "lsp.commandoption";
 
   private JTextField filepatternField;
   private JTextField jarField;
-    private JTextField cpField;
-    private JTextField mcField;
-    private JTextField argsField;
+  private JTextField cpField;
+  private JTextField mcField;
+  private JTextField argsField;
 
-    private JTextField dirField;
-    private JTextField jvmField;
-    private JTextField pathField;
-    private JTextField hostField;
-    private JTextField portField;
-    private JRadioButton socketButton;
-    private JRadioButton commandOneRadio;
+  private JTextField dirField;
+  private JTextField jvmField;
+  private JTextField pathField;
+  private JTextField hostField;
+  private JTextField portField;
+  private JRadioButton socketButton;
+  private JRadioButton commandOneRadio;
 
   private boolean isModified = false;
   private String selectedConfigLineKey = null;
@@ -444,6 +444,7 @@ public class Configuration implements Configurable {
     */
 
     isModified = false;
+    // FIXME: call service via project... TODO: get current project
     ServiceManager.getService(ProjectService.class).restartServerConnection();
 
   }

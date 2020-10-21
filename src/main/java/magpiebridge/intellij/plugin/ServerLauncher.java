@@ -8,21 +8,19 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentManager;
 import lsp4intellij.MyRawCommandServerDefinition;
 import lsp4intellij.SocketServerDefinition;
-import lsp4intellij.diagnosticsview.DiagnosticsViewPanel;
-import org.eclipse.lsp4j.*;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
 import org.wso2.lsp4intellij.client.languageserver.serverdefinition.LanguageServerDefinition;
 import org.wso2.lsp4intellij.utils.FileUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class ServerLauncher {
 
@@ -126,31 +124,12 @@ public class ServerLauncher {
     service.initProjectConnections(project);
 
 
-    // TESTING AREA
-
-    final Diagnostic diagnostic = new Diagnostic();
-    diagnostic.setMessage("This is a Jimple Error. ");
-    diagnostic.setRange(new Range(new Position(2, 0), new Position(2, 10)));
-    diagnostic.setSource("Jimpleparser");
-    diagnostic.setCode("403 Forbidden");
-    diagnostic.setSeverity(DiagnosticSeverity.Error);
-
-    List<DiagnosticRelatedInformation> related = new ArrayList<>();
-    related.add(new DiagnosticRelatedInformation(new Location("file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/invalid.jimple", new Range(new Position(4, 4), new Position(4, 10))), "problem A"));
-    related.add(new DiagnosticRelatedInformation(new Location("file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/helloworld.jimple", new Range(new Position(6, 6), new Position(6, 12))), "problem B"));
-    related.add(new DiagnosticRelatedInformation(new Location("file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/invalid.jimple", new Range(new Position(8, 8), new Position(8, 14))), "problem C"));
-    diagnostic.setRelatedInformation(related);
-
 
     ApplicationManager.getApplication().invokeLater(() -> {
 
 
       String fileUri = "file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/helloworld.jimple";
       final VirtualFile vf = FileUtils.virtualFileFromURI(fileUri);
-
-
-      final ContentManager contentManager = com.intellij.analysis.problemsView.toolWindow.ProblemsView.getToolWindow(project).getContentManager();
-      final Content selectedContent = contentManager.getSelectedContent();
 
 
       /*
@@ -164,20 +143,8 @@ public class ServerLauncher {
         }
       }
       */
-
-      final DiagnosticsViewPanel component = new DiagnosticsViewPanel(project);
-      List<Diagnostic> diagnostics = new ArrayList<>(Collections.singletonList(diagnostic));
-      for (Diagnostic diag : diagnostics) {
-        component.addDiagnostic(diag, "file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/helloworld.jimple");
-      }
-      component.expandAll();
-
-      final Content content = contentManager.getFactory().createContent(component, "Diagnostics", false);
-      contentManager.addContent(content);
-      contentManager.setSelectedContent(content, true, true);
-      Disposer.register( ServiceManager.getService(IntellijLanguageClient.class) , component);
-
     });
+
 
   }
 

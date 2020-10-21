@@ -3,18 +3,21 @@ package magpiebridge.intellij.plugin;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import lsp4intellij.diagnosticsview.DiagnosticsViewPanel;
 import org.jetbrains.annotations.NotNull;
 
 @Service
 public final class ProjectService implements Disposable {
 
   private Project project;
+  private DiagnosticsViewPanel diagnosticsViewPanel;
 
   public ProjectService() {
   }
 
   public void setProject(@NotNull Project myProject) {
-    this.project = myProject;
+    project = myProject;
+    diagnosticsViewPanel = new DiagnosticsViewPanel(myProject);
   }
 
 
@@ -38,5 +41,9 @@ public final class ProjectService implements Disposable {
 
   public Project getProject() {
     return project;
+  }
+
+  public DiagnosticsViewPanel getDiagnosticsViewPanel() {
+    return diagnosticsViewPanel;
   }
 }
