@@ -5,10 +5,12 @@ import com.intellij.ide.errorTreeView.ErrorTreeElement;
 import com.intellij.ide.errorTreeView.ErrorViewStructure;
 import com.intellij.ide.errorTreeView.NewErrorTreeViewPanel;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.pom.Navigatable;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.util.ui.JBUI;
@@ -32,7 +34,7 @@ public final class DiagnosticsViewPanel extends NewErrorTreeViewPanel {
   private boolean fileDiagnosticScope = true;
 
   public DiagnosticsViewPanel(Project project) {
-    super(project, null, true, true);
+    super(project, null, true, false);
     createToolbarPanel();
   }
 
@@ -89,7 +91,8 @@ public final class DiagnosticsViewPanel extends NewErrorTreeViewPanel {
     for (Diagnostic diagnostic : diagnosticParams.getDiagnostics()) {
 
       final VirtualFile vf = FileUtils.virtualFileFromURI(diagnosticParams.getUri());
-      final DiagnosticGroupingElement groupingElement = new DiagnosticGroupingElement(diagnostic, vf);
+      Navigatable navigatable = new OpenFileDescriptor(project, vf, diagnostic.getRange().getStart().getLine(), diagnostic.getRange().getStart().getCharacter());
+      final DiagnosticGroupingElement groupingElement = new DiagnosticGroupingElement(diagnostic,navigatable, vf);
 
       final List<DiagnosticRelatedInformation> diagnosticRelatedInformations = diagnostic.getRelatedInformation();
       if (diagnosticRelatedInformations != null && !diagnosticRelatedInformations.isEmpty()) {

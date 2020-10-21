@@ -2,23 +2,22 @@ package lsp4intellij.diagnosticsview;
 
 import com.intellij.ide.errorTreeView.ErrorTreeElementKind;
 import com.intellij.ide.errorTreeView.GroupingElement;
+import com.intellij.ide.errorTreeView.NavigatableErrorTreeElement;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.CustomizeColoredTreeCellRenderer;
-import com.intellij.ui.SimpleColoredComponent;
-import com.intellij.ui.SimpleTextAttributes;
+import com.intellij.pom.Navigatable;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.wso2.lsp4intellij.utils.FileUtils;
+import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-
-public final class DiagnosticGroupingElement extends GroupingElement {
+public final class DiagnosticGroupingElement extends GroupingElement implements NavigatableErrorTreeElement {
 
   private final Diagnostic diag;
+  private Navigatable navigatable;
 
-  public DiagnosticGroupingElement(Diagnostic diag, VirtualFile file) {
+  public DiagnosticGroupingElement(Diagnostic diag, Navigatable navigatable, VirtualFile file) {
     super(diag.getMessage()+file.toNioPath().toString(), null, file);
     this.diag = diag;
+    this.navigatable = navigatable;
     setKind(getType(diag.getSeverity()));
   }
 
@@ -89,4 +88,8 @@ public final class DiagnosticGroupingElement extends GroupingElement {
     };
   }
 
+  @Override
+  public @NotNull Navigatable getNavigatable() {
+    return navigatable;
+  }
 }
