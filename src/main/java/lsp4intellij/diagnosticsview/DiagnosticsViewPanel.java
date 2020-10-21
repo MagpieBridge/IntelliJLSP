@@ -78,6 +78,9 @@ public final class DiagnosticsViewPanel extends NewErrorTreeViewPanel {
     }
 
     // TODO: filter Diagnostics for current file vs show for all files
+//    final FileEditorManager instance = FileEditorManager.getInstance(project);
+//    Editor editor = instance.getSelectedTextEditor();
+
 
     final ErrorViewStructure errorViewStructure = getErrorViewStructure();
     List<ErrorTreeElement> addedlist = new ArrayList<>();
@@ -92,7 +95,8 @@ public final class DiagnosticsViewPanel extends NewErrorTreeViewPanel {
       if (diagnosticRelatedInformations != null && !diagnosticRelatedInformations.isEmpty()) {
         for (DiagnosticRelatedInformation relatedInformation : diagnosticRelatedInformations) {
           final DiagnosticNavigatableMessageElement navigatableMessageElement = new DiagnosticNavigatableMessageElement(relatedInformation, groupingElement, myProject);
-          errorViewStructure.addNavigatableMessage(diagnostic.getMessage(), navigatableMessageElement);
+          final String groupName = diagnostic.getMessage() + vf.toNioPath().toString();
+          errorViewStructure.addNavigatableMessage(groupName, navigatableMessageElement);
           addedlist.add(navigatableMessageElement);
         }
       }

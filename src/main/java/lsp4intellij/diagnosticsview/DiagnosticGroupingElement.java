@@ -17,9 +17,15 @@ public final class DiagnosticGroupingElement extends GroupingElement {
   private final Diagnostic diag;
 
   public DiagnosticGroupingElement(Diagnostic diag, VirtualFile file) {
-    super(diag.getMessage(), null, file);
+    super(diag.getMessage()+file.toNioPath().toString(), null, file);
     this.diag = diag;
     setKind(getType(diag.getSeverity()));
+  }
+
+
+  @Override
+  public String[] getText() {
+    return new String[]{diag.getMessage()};
   }
 
   private static ErrorTreeElementKind getType(DiagnosticSeverity severity) {
@@ -82,6 +88,5 @@ public final class DiagnosticGroupingElement extends GroupingElement {
       }
     };
   }
-
 
 }
