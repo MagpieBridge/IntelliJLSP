@@ -1,5 +1,7 @@
+/*
 includeBuild('lib/lsp4intellij') {
     dependencySubstitution {
-        substitute module('com.github.ballerina-platform:lsp4intellij:master') with project(':')
+        substitute module('com.github.swissiety:lsp4intellij:master') with project(':')
     }
 }
+*/
