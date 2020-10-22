@@ -36,7 +36,7 @@ public class MagpieLanguageClient extends DefaultLanguageClient implements Langu
   @Override
   public void publishDiagnostics(PublishDiagnosticsParams publishDiagnosticsParams) {
 
-    // update diagnosticspanel
+    // update diagnostics tab in problemsview
     final Project project = getContext().getProject();
     final DiagnosticsViewPanel component = project.getService(ProjectService.class).getDiagnosticsViewPanel();
     ApplicationUtils.invokeLater(() -> {

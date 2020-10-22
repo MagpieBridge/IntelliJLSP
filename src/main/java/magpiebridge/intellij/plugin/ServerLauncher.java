@@ -5,15 +5,12 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import lsp4intellij.MyRawCommandServerDefinition;
 import lsp4intellij.SocketServerDefinition;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
 import org.wso2.lsp4intellij.client.languageserver.serverdefinition.LanguageServerDefinition;
-import org.wso2.lsp4intellij.utils.FileUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -122,30 +119,6 @@ public class ServerLauncher {
     service.setConfigParams(Lists.newArrayList(map.entrySet()));
     service.init();
     service.initProjectConnections(project);
-
-
-
-    ApplicationManager.getApplication().invokeLater(() -> {
-
-
-      String fileUri = "file:///home/smarkus/IdeaProjects/JimpleLspExampleProject/module1/src/helloworld.jimple";
-      final VirtualFile vf = FileUtils.virtualFileFromURI(fileUri);
-
-
-      /*
-      final DiagnosticGroupingElement groupingElement = new DiagnosticGroupingElement(diagnostic, vf);
-      final List<DiagnosticRelatedInformation> diagnosticRelatedInformations = diagnostic.getRelatedInformation();
-      if (diagnosticRelatedInformations != null && !diagnosticRelatedInformations.isEmpty()) {
-        for (DiagnosticRelatedInformation relatedInformation : diagnosticRelatedInformations) {
-          final UUID sessionId = UUID.randomUUID();
-          ProblemsView.SERVICE.getInstance(project).addMessage(MessageCategory.ERROR, new String[]{diagnostic.getMessage(), "zeile zwei"},diagnostic.getMessage(), new LSPNavigatable(project, vf.toNioPath().toFile(),diagnostic.getRange()),null, null, sessionId);
-          ProblemsView.SERVICE.getInstance(project).addMessage(MessageCategory.ERROR, new String[]{"2"+diagnostic.getMessage(), "2zeile zwei"},diagnostic.getMessage(), new LSPNavigatable(project, vf.toNioPath().toFile(),diagnostic.getRange()),null, "blubb", sessionId);
-        }
-      }
-      */
-    });
-
-
   }
 
 

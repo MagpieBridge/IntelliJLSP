@@ -18,35 +18,37 @@ public class DiagnosticNavigatableMessageElement extends NavigatableMessageEleme
   private final DiagnosticRelatedInformation relatedInfo;
 
   public DiagnosticNavigatableMessageElement(DiagnosticRelatedInformation relatedInfo, GroupingElement group, Project project) {
-    super(group.getKind(), group, new String[]{relatedInfo.getMessage(), "new line 1", "new two"}, new LSPNavigatable(project, relatedInfo.getLocation()), "", "");
+    super(group.getKind(), group, new String[]{relatedInfo.getMessage(), "hardcocded:new line 1", "hardcocded:new two"}, new LSPNavigatable(project, relatedInfo.getLocation()), "", "");
     this.relatedInfo = relatedInfo;
   }
 
+  final CustomizeColoredTreeCellRenderer customizeColoredTreeCellRenderer = new CustomizeColoredTreeCellRenderer() {
+    @Override
+    public void customizeCellRenderer(SimpleColoredComponent renderer,
+                                      JTree tree,
+                                      Object value,
+                                      boolean selected,
+                                      boolean expanded,
+                                      boolean leaf,
+                                      int row,
+                                      boolean hasFocus) {
+
+      final String[] text = getText();
+      if (text != null) {
+        // FIXME: render multiple lines
+        renderer.append(text[0], SimpleTextAttributes.REGULAR_ATTRIBUTES);
+      }
+
+      renderer.append(" ");
+      renderer.append(FileUtils.shortenFileUri(relatedInfo.getLocation().getUri()), SimpleTextAttributes.GRAYED_ATTRIBUTES);
+      renderer.append(" (" + relatedInfo.getLocation().getRange().getStart().getLine() + "," + relatedInfo.getLocation().getRange().getStart().getCharacter() + ")", SimpleTextAttributes.GRAYED_ATTRIBUTES);
+
+    }
+  };
+
   @Override
   public CustomizeColoredTreeCellRenderer getLeftSelfRenderer() {
-    return new CustomizeColoredTreeCellRenderer() {
-      @Override
-      public void customizeCellRenderer(SimpleColoredComponent renderer,
-                                        JTree tree,
-                                        Object value,
-                                        boolean selected,
-                                        boolean expanded,
-                                        boolean leaf,
-                                        int row,
-                                        boolean hasFocus) {
-
-        final String[] text = getText();
-        if (text != null) {
-          // FIXME: render multiple lines
-          renderer.append(text[0], SimpleTextAttributes.REGULAR_ATTRIBUTES);
-        }
-
-        renderer.append(" ");
-        renderer.append(FileUtils.shortenFileUri(relatedInfo.getLocation().getUri()), SimpleTextAttributes.GRAYED_ATTRIBUTES);
-        renderer.append(" (" + relatedInfo.getLocation().getRange().getStart().getLine() + "," + relatedInfo.getLocation().getRange().getStart().getCharacter() + ")", SimpleTextAttributes.GRAYED_ATTRIBUTES);
-
-      }
-    };
+    return customizeColoredTreeCellRenderer;
   }
 
   @Override

@@ -5,9 +5,15 @@ import com.intellij.ide.errorTreeView.GroupingElement;
 import com.intellij.ide.errorTreeView.NavigatableErrorTreeElement;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
+import com.intellij.ui.CustomizeColoredTreeCellRenderer;
+import com.intellij.ui.SimpleColoredComponent;
+import com.intellij.ui.SimpleTextAttributes;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.jetbrains.annotations.NotNull;
+import org.wso2.lsp4intellij.utils.FileUtils;
+
+import javax.swing.*;
 
 public final class DiagnosticGroupingElement extends GroupingElement implements NavigatableErrorTreeElement {
 
@@ -42,50 +48,53 @@ public final class DiagnosticGroupingElement extends GroupingElement implements 
   }
 
 
+  final CustomizeColoredTreeCellRenderer customizeColoredTreeCellRenderer = new CustomizeColoredTreeCellRenderer() {
+    @Override
+    public void customizeCellRenderer(SimpleColoredComponent renderer,
+                                      JTree tree,
+                                      Object value,
+                                      boolean selected,
+                                      boolean expanded,
+                                      boolean leaf,
+                                      int row,
+                                      boolean hasFocus) {
+      renderer.setIcon(getKind().getIcon());
+
+      final String[] text = getText();
+      if (text != null) {
+        // FIXME: render multiple lines
+        renderer.append(text[0], SimpleTextAttributes.REGULAR_ATTRIBUTES);
+      }
+      renderer.append(" ");
+      renderer.append(FileUtils.shortenFileUri(getFile().getName()), SimpleTextAttributes.GRAYED_ATTRIBUTES);
+      renderer.append("(" + diag.getRange().getStart().getLine() + "," + diag.getRange().getStart().getCharacter() + ")", SimpleTextAttributes.GRAYED_ATTRIBUTES);
+
+    }
+  };
+
   @Override
   public CustomizeColoredTreeCellRenderer getLeftSelfRenderer() {
-    return new CustomizeColoredTreeCellRenderer() {
-      @Override
-      public void customizeCellRenderer(SimpleColoredComponent renderer,
-                                        JTree tree,
-                                        Object value,
-                                        boolean selected,
-                                        boolean expanded,
-                                        boolean leaf,
-                                        int row,
-                                        boolean hasFocus) {
-        renderer.setIcon(getKind().getIcon());
-
-        final String[] text = getText();
-        if (text != null) {
-          // FIXME: render multiple lines
-          renderer.append(text[0], SimpleTextAttributes.REGULAR_ATTRIBUTES);
-        }
-
-        renderer.append(FileUtils.shortenFileUri(getFile().getName()), SimpleTextAttributes.GRAYED_ATTRIBUTES);
-        renderer.append(" (" + diag.getRange().getStart().getLine() + "," + diag.getRange().getStart().getCharacter() + ")", SimpleTextAttributes.GRAYED_ATTRIBUTES);
-
-      }
-    };
+    return customizeColoredTreeCellRenderer;
   }
 
+  final CustomizeColoredTreeCellRenderer customizeColoredTreeCellRenderer2 = new CustomizeColoredTreeCellRenderer() {
+    @Override
+    public void customizeCellRenderer(SimpleColoredComponent renderer,
+                                      JTree tree,
+                                      Object value,
+                                      boolean selected,
+                                      boolean expanded,
+                                      boolean leaf,
+                                      int row,
+                                      boolean hasFocus) {
+      renderer.append(diag.getSource(), SimpleTextAttributes.GRAYED_ATTRIBUTES);
+      renderer.setOpaque(true);
+      renderer.setTransparentIconBackground(true);
+    }
+  };
   @Override
   public CustomizeColoredTreeCellRenderer getRightSelfRenderer() {
-    return new CustomizeColoredTreeCellRenderer() {
-      @Override
-      public void customizeCellRenderer(SimpleColoredComponent renderer,
-                                        JTree tree,
-                                        Object value,
-                                        boolean selected,
-                                        boolean expanded,
-                                        boolean leaf,
-                                        int row,
-                                        boolean hasFocus) {
-        renderer.append(diag.getSource(), SimpleTextAttributes.GRAYED_ATTRIBUTES);
-        renderer.setOpaque(true);
-        renderer.setTransparentIconBackground(true);
-      }
-    };
+    return customizeColoredTreeCellRenderer2;
   }
 
   @Override
