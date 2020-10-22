@@ -30,7 +30,7 @@ public class MagpieLanguageClient extends DefaultLanguageClient implements Langu
 
   @JsonNotification("magpiebridge/showHTML")
   public void showHTML(String content) {
-    HtmlToolWindowFactory.show(getContext().getProject(), content);
+    HtmlToolWindowFactory.updateHtmlContent(getContext().getProject(), content);
   }
 
   @Override
