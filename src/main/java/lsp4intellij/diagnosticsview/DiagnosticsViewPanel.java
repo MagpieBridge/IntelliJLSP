@@ -4,7 +4,7 @@ import com.intellij.analysis.problemsView.toolWindow.ProblemsView;
 import com.intellij.ide.errorTreeView.ErrorTreeElement;
 import com.intellij.ide.errorTreeView.ErrorViewStructure;
 import com.intellij.ide.errorTreeView.NewErrorTreeViewPanel;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
@@ -13,7 +13,6 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
-import com.intellij.util.ui.JBUI;
 import magpiebridge.intellij.plugin.ProjectService;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticRelatedInformation;
@@ -22,43 +21,35 @@ import org.jetbrains.annotations.NotNull;
 import org.wso2.lsp4intellij.utils.ApplicationUtils;
 import org.wso2.lsp4intellij.utils.FileUtils;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// FIXME: show multiline message: custom renderer does not use MultilineTreeCellRenderer?! wtf. check that
+// FIXME: ugly white background/rectangles if selected on the right side
+// TODO: panel to toggle scope: show all received diagnostics vs current file
+
 public final class DiagnosticsViewPanel extends NewErrorTreeViewPanel {
   private Map<String, List<ErrorTreeElement>> diagnosticMap = null;
   private ActionToolbar myLeftToolbar;
   private boolean fileDiagnosticScope = true;
+  private Content content = null;
 
   public DiagnosticsViewPanel(Project project) {
-    super(project, null, true, false);
-    createToolbarPanel();
+    super(project, null, false, false, null);
+    myTree.getEmptyText().setText("No Diagnostics received from the LSP Server.");
   }
 
-  private JPanel createToolbarPanel() {
-    DefaultActionGroup group = new DefaultActionGroup();
-
-    group.addSeparator();
-    group.add(new ToggleAllDiagnosticsAction());
-
-    ActionManager actionManager = ActionManager.getInstance();
-    myLeftToolbar = actionManager.createActionToolbar(ActionPlaces.COMPILER_MESSAGES_TOOLBAR, group, false);
-    return JBUI.Panels.simplePanel(myLeftToolbar.getComponent());
-  }
-
-
-  public void initialize(@NotNull Project project){
+  private void initialize(@NotNull Project project){
 
     final ToolWindow toolWindow = ProblemsView.getToolWindow(project);
 
     final ContentManager contentManager = toolWindow.getContentManager();
     final DiagnosticsViewPanel component = project.getService(ProjectService.class).getDiagnosticsViewPanel();
 
+    content = contentManager.getFactory().createContent(component, "Diagnostics", false);
     ApplicationUtils.invokeLater( () -> {
-      final Content content = contentManager.getFactory().createContent(component, "Diagnostics", false);
       contentManager.addContent(content);
       contentManager.setSelectedContent(content, true, true);
     });
@@ -113,14 +104,8 @@ public final class DiagnosticsViewPanel extends NewErrorTreeViewPanel {
       }
     }
 
-    expandAll();
+    // TODO: update tab name to number of diagnostics
+    content.setTabName("BANANA (3)");    // + ((diagnosticMap.isEmpty())? "" : "("+diagnosticMap.size()+")")
   }
 
-
-  private final class ToggleAllDiagnosticsAction extends AnAction {
-    @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-      fileDiagnosticScope = !fileDiagnosticScope;
-    }
-  }
 }
