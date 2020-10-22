@@ -2,10 +2,10 @@ package magpiebridge.intellij.plugin;
 
 import com.intellij.ide.HelpTooltip;
 import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
 import org.jetbrains.annotations.Nls;
@@ -25,6 +25,11 @@ import java.util.List;
  * Configuration for LSP Server.
  */
 public class Configuration implements Configurable {
+  private Project project;
+
+  public Configuration(Project project) {
+    this.project = project;
+  }
 
   List<String> configKeys = new ArrayList<>();
   List<String> configValues = new ArrayList<>();
@@ -445,7 +450,7 @@ public class Configuration implements Configurable {
 
     isModified = false;
     // FIXME: call service via project... TODO: get current project
-    ServiceManager.getService(ProjectService.class).restartServerConnection();
+    project.getService(ProjectService.class).restartServerConnection();
 
   }
 }
