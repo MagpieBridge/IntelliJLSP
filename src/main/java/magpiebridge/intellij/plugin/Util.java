@@ -93,4 +93,13 @@ public class Util {
         server.getWorkspaceService().executeCommand(params);
     }
 
+
+    public static String shortenFileUri(String fileuri) {
+        return fileuri.substring(fileuri.lastIndexOf('/') + 1);
+    }
+
+    public static String positionToString(Position pos) {
+        return "(" + pos.getLine() + "," + pos.getCharacter() + ")";
+    }
+
 }

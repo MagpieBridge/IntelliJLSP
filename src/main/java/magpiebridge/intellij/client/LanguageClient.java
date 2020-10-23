@@ -3,10 +3,11 @@
 package magpiebridge.intellij.client;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -64,16 +65,12 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.LightweightHint;
 import com.intellij.ui.awt.RelativePoint;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 import magpiebridge.intellij.plugin.QuickFixes;
 import magpiebridge.intellij.plugin.Util;
-import netscape.javascript.JSObject;
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
 import org.eclipse.lsp4j.CodeAction;
@@ -95,6 +92,9 @@ import org.eclipse.lsp4j.jsonrpc.services.JsonNotification;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
+import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+import static org.apache.commons.lang.StringEscapeUtils.escapeJavaScript;
 
 public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient {
 
@@ -365,6 +365,8 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
     private Balloon currentHint = null;
     private Diagnostic currHintDiag = null;
 
+
+
     private void showMarkup(Diagnostic diag, Editor editor, Document doc) {
         int flags =0;// HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
 
@@ -396,55 +398,26 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                         if (diag == currHintDiag && currentHint != null){
                             return;
                         }
-                        String msg = diag.getMessage();
-                        if(diag.getSource()!=null)
-                            msg="["+ diag.getSource()+"] "+msg;
-                        JLabel label = new JLabel(msg);
-                        label.setBackground(Color.lightGray);
-                        JComponent hintText = label;
-                        boolean showRelatedInfo = false;
-                        //show related information
-                        List<DiagnosticRelatedInformation> relatedInfo = diag.getRelatedInformation();
-                        if (relatedInfo != null && relatedInfo.size() > 0) {
-                            showRelatedInfo = true;
-                            JPanel p = new JPanel();
-                            p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-                            p.add(hintText);
-                            //p.add(new JLabel("Related Information"));
-                            JPanel relInfoPanel = new JPanel();
-                            relInfoPanel.setLayout(new GridLayout(0,2));
-                            p.add(relInfoPanel);
-                            relatedInfo.sort(Comparator.comparingInt(d -> d.getLocation().getRange().getStart().getLine()));
-                            relatedInfo.forEach(d->{
-                                String fileName = d.getLocation().getUri();
-                                String[] pathParts = fileName.split("[/\\\\]");
-                                fileName = pathParts[pathParts.length-1];
-                                Range codeRange = d.getLocation().getRange();
-                                int line=codeRange.getStart().getLine()+1;
-                                int column=codeRange.getStart().getCharacter()+1;
-                                JButton gotoButton = new JButton(fileName.concat("("+line+", "+column+"):"));
-                                gotoButton.setOpaque(false);
-                                gotoButton.setBorderPainted(false);
-                                gotoButton.addActionListener(click->{
-                                    setSelection(d.getLocation().getUri(),codeRange);
-                                    currentHint.dispose();
-                                });
-                                relInfoPanel.add(gotoButton);
-                                relInfoPanel.add(new JLabel(d.getMessage()));
-                            });
-                            hintText = p;
-                        }
                         if (currentHint != null){
                             currentHint.dispose();
                         }
-                        if(showRelatedInfo)
-                            currentHint = JBPopupFactory.getInstance().createBalloonBuilder(hintText).createBalloon();
-                        else {
-                            msg = msg.replaceAll("(\r\n|\n)", "<br />");
-                            String html ="<html><body>"+msg+"</body></html>";
-                            currentHint = JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(html,  getMessageType(diag.getSeverity()), null).createBalloon();
-                        }
-                        currentHint.show(new RelativePoint(e.getMouseEvent()), Balloon.Position.above);
+                        String html = buildHoverHTML(diag);
+                        MessageType messageType = getMessageType(diag.getSeverity());
+                        currentHint =JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(html, messageType.getDefaultIcon(), messageType.getPopupBackground(), new HyperlinkListener() {
+                            @Override
+                            public void hyperlinkUpdate(HyperlinkEvent e) {
+                                if(! (e.getEventType() == ACTIVATED)){return;}
+                                String[] splits = e.getURL().toString().split("->");
+                                String url = splits[0];
+                                final int startLine=Integer.parseInt(splits[1]);
+                                final int startCharacter =Integer.parseInt(splits[2]);
+                                final int endLine = Integer.parseInt(splits[3]);
+                                final int endCharacter = Integer.parseInt(splits[4]);
+                                Range range =new Range(new Position(startLine,startCharacter), new Position(endLine,endCharacter));
+                                setSelection(url, range);
+                            }
+                        } ).createBalloon();
+                        currentHint.show(new RelativePoint(e.getMouseEvent()), Balloon.Position.below);
                         currHintDiag = diag;
                         currentHint.addListener(new JBPopupListener() {
                             @Override
@@ -476,6 +449,63 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         }
 
         editorListeners.get(editor).add(l);
+    }
+
+    /**
+     * This method creates hover message for diagnostic.
+     * @param diagnostic
+     * @return
+     */
+    private String buildHoverHTML(Diagnostic diagnostic) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><div style='margin:5px 0;'>").
+            append(escapeHtml(diagnostic.getMessage()).replaceAll("\n", "<br>")).
+              append("</div>");
+
+        if (diagnostic.getRelatedInformation() != null && !diagnostic.getRelatedInformation().isEmpty()) {
+
+            for (DiagnosticRelatedInformation related : diagnostic.getRelatedInformation()) {
+                final VirtualFile hrefVf = Util.getVirtualFile(related.getLocation().getUri());
+                final Range range = related.getLocation().getRange();
+                final int startLine=range.getStart().getLine();
+                final int startCharacter = range.getStart().getCharacter();
+                final int endLine = range.getEnd().getLine();
+                final int endCharactor = range.getEnd().getCharacter();
+                if(hrefVf != null) {
+                    sb.append("<a href=\"").append(related.getLocation().getUri()).
+                        append("->").append(startLine).append("->").append(startCharacter).append("->").append(endLine).append("->").append(endCharactor).append("\">").
+                          append(Util.shortenFileUri(related.getLocation().getUri())).append(" ").append(Util.positionToString(new Position(startLine+1,startCharacter))).append("</a> ");
+                }else{
+                    sb.append("<span color='GRAY'>").append(escapeHtml(Util.shortenFileUri(related.getLocation().getUri()))).append(" ").append(escapeHtml(Util.positionToString(new Position(startLine+1,startCharacter)))).append("</span> ");
+                }
+                sb.append(" ").append(escapeHtml(related.getMessage())).append("<br>");
+            }
+        }
+
+        String code = "";
+        boolean hasCode = false, hasSource = false;
+        if (diagnostic.getCode() != null) {
+            code = diagnostic.getCode().get().toString();
+            if (!code.isEmpty()) {
+                hasCode = true;
+            }
+        }
+        final String source = diagnostic.getSource();
+        if (source != null && !source.isEmpty()) {
+            hasSource = true;
+        }
+        if( hasCode || hasSource) {
+            sb.append("<div style='color:GRAY;text-align:right;'>");
+            if (hasCode) {
+                sb.append(escapeHtml(code)).append(" ");
+            }
+            if (hasSource) {
+                sb.append(escapeHtml(source));
+            }
+            sb.append("</div>");
+        }
+        sb.append("</html>");
+        return sb.toString();
     }
 
     private MessageType getMessageType(DiagnosticSeverity severity)
