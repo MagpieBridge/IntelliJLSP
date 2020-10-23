@@ -8,10 +8,10 @@ import magpiebridge.intellij.plugin.Service;
 
 public class TestServer extends AnAction {
 
-    @Override
-    public void actionPerformed(AnActionEvent e) {
-        Project p = e.getProject();
-        EchoServer es = new EchoServer();
-        new Service(p, es, new MagpieLanguageClient(p, es));
-    }
+  @Override
+  public void actionPerformed(AnActionEvent e) {
+    Project p = e.getProject();
+    EchoServer es = new EchoServer();
+    new Service(p, es, new MagpieLanguageClient(p, es));
+  }
 }
