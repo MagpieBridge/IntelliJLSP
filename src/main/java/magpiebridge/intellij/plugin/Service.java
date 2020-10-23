@@ -37,6 +37,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.LightweightHint;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
+import magpiebridge.intellij.client.MagpieLanguageClient;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
@@ -329,8 +330,8 @@ public class Service {
                         });
                     }
 
-                    if (lc instanceof magpiebridge.intellij.client.LanguageClient) {
-                        ((magpiebridge.intellij.client.LanguageClient) lc).showDiagnostics(file);
+                    if (lc instanceof MagpieLanguageClient) {
+                        ((MagpieLanguageClient) lc).showDiagnostics(file);
                     }
                 }
 

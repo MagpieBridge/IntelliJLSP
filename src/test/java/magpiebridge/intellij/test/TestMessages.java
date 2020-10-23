@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.Project;
-import magpiebridge.intellij.client.LanguageClient;
+import magpiebridge.intellij.client.MagpieLanguageClient;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
@@ -23,7 +23,7 @@ public class TestMessages extends AnAction {
         Project project = e.getData(PlatformDataKeys.PROJECT);
 
         EchoServer server = new EchoServer();
-        LanguageClient lc = new LanguageClient(project, server);
+        MagpieLanguageClient lc = new MagpieLanguageClient(project, server);
         server.connect(lc);
 
         MessageParams sm = new MessageParams();

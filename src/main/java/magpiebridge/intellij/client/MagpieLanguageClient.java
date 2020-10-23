@@ -2,7 +2,6 @@
 // another line to hack
 package magpiebridge.intellij.client;
 
-import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import java.awt.*;
@@ -14,21 +13,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import com.intellij.codeInsight.hint.HintManager;
-import com.intellij.codeInsight.hint.HintManagerImpl;
-import com.intellij.compiler.ProblemsView;
-import com.intellij.compiler.impl.OneProjectItemCompileScope;
 import com.intellij.compiler.progress.CompilerTask;
+import com.intellij.ide.errorTreeView.ErrorViewStructure;
+import com.intellij.ide.errorTreeView.NewErrorTreeViewPanel;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.compiler.CompilerMessage;
 import com.intellij.openapi.compiler.CompilerMessageCategory;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
@@ -48,7 +43,6 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
@@ -60,10 +54,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.pom.Navigatable;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.LightweightHint;
 import com.intellij.ui.awt.RelativePoint;
+import com.intellij.util.ui.MessageCategory;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
@@ -96,7 +89,7 @@ import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 import static org.apache.commons.lang.StringEscapeUtils.escapeJavaScript;
 
-public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient {
+public class MagpieLanguageClient implements org.eclipse.lsp4j.services.LanguageClient {
 
     private static final int informationType = CompilerTask.translateCategory(CompilerMessageCategory.INFORMATION);
 
@@ -194,23 +187,27 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 
     private final Project project;
     private LanguageServer server;
-    private final ProblemsView problemView;
     private final QuickFixes quickFixes;
     private final Map<VirtualFile, List<Diagnostic>> publishedDiagnostics = new HashMap<>();
     private WebView htmlViewer;
+    private NewErrorTreeViewPanel diagViewPanel;
+    private ToolWindow diagViewWindow;
+    private ToolWindow controlViewWindow;
+    private String diagViewID ="MagpieBridge LSP Diagnostics";
+    private String controlViewID ="MagpieBridge Control Panel";
 
-    public LanguageClient(Project project, LanguageServer server) {
+    public MagpieLanguageClient(Project project, LanguageServer server) {
         this(project);
         this.server = server;
     }
 
-    public LanguageClient(Project project) {
+    public MagpieLanguageClient(Project project) {
         this.project = project;
-        this.problemView = ProblemsView.SERVICE.getInstance(project);
         this.quickFixes = project.getComponent(QuickFixes.class);
-        ToolWindow toolWindow = ToolWindowManager.getInstance(project).registerToolWindow("MagpieBridge Control Panel", false, ToolWindowAnchor.BOTTOM);
+
+        //add control panel window
+        this.controlViewWindow = ToolWindowManager.getInstance(project).registerToolWindow(controlViewID, false, ToolWindowAnchor.BOTTOM);
         JFXPanel fxPanel = new JFXPanel();
-        JComponent component = toolWindow.getComponent();
         Platform.setImplicitExit(false);
         Platform.runLater(() -> {
             Group root  =  new Group();
@@ -221,8 +218,12 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
             root.getChildren().add(htmlViewer);
             fxPanel.setScene(scene);
         });
-        component.getParent().add(fxPanel);
+        this.controlViewWindow.getComponent().getParent().add(fxPanel);
 
+        //add diagnostics window
+        this.diagViewWindow = ToolWindowManager.getInstance(project).registerToolWindow(diagViewID, false, ToolWindowAnchor.BOTTOM);
+        this.diagViewPanel = new NewErrorTreeViewPanel(project,null);
+        this.diagViewWindow.getComponent().add(diagViewPanel);
     }
 
     public void connect(LanguageServer server) {
@@ -242,6 +243,11 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         }
     }
 
+    /**
+     * This method select code range in the given file.
+     * @param file
+     * @param range
+     */
     private void setSelection(String file, Range range){
         VirtualFile vf = Util.getVirtualFile(file);
         Document doc = Util.getDocument(vf);
@@ -250,7 +256,6 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
         Position end = range.getEnd();
         int endOffset = doc.getLineStartOffset(end.getLine()) + end.getCharacter();
-
         Editor activeEditor;
         if (editors.length > 0)
             activeEditor = editors[0];
@@ -281,10 +286,8 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 
     @Override
     public void publishDiagnostics(PublishDiagnosticsParams params) {
-
         String file = params.getUri();
         VirtualFile vf = Util.getVirtualFile(file);
-
         this.publishedDiagnostics.put(vf, params.getDiagnostics());
         showDiagnostics(vf);
     }
@@ -293,57 +296,22 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
         if (!publishedDiagnostics.containsKey(vf)){
             return;
         }
+        //clean up the diagnostics for current file at first
+        ErrorViewStructure structure = this.diagViewPanel.getErrorViewStructure();
+        structure.removeGroup(vf.getPath());
+        this.diagViewPanel.reload();
+
         Document doc = Util.getDocument(vf);
         List<Diagnostic> diagnostics = publishedDiagnostics.get(vf);
-        UUID uuid =  UUID.randomUUID();
-        //clean up old messages in problem view before adding new ones
-        problemView.clearOldMessages(new OneProjectItemCompileScope(project,vf),uuid);
         diagnostics.forEach((diag) -> {
             Range rng = diag.getRange();
             Position start = rng.getStart();
-            int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
-            Navigatable x = new OpenFileDescriptor(project, vf, startOffset);
-            CompilerMessage msg = new CompilerMessage() {
-                @NotNull
-                @Override
-                public CompilerMessageCategory getCategory() {
-                    DiagnosticSeverity severity=diag.getSeverity();
-                    if(severity.equals(DiagnosticSeverity.Error))
-                        return CompilerMessageCategory.ERROR;
-                    if(severity.equals(DiagnosticSeverity.Warning))
-                        return CompilerMessageCategory.WARNING;
-                    return CompilerMessageCategory.INFORMATION;
-                }
-
-                @Override
-                public String getMessage() {
-                    if(diag.getSource()!=null)
-                        return diag.getMessage()+" ["+diag.getSource()+"]";
-                    return diag.getMessage();
-                }
-
-                @Nullable
-                @Override
-                public Navigatable getNavigatable() {
-                    return x;
-                }
-
-                @Override
-                public VirtualFile getVirtualFile() {
-                    return vf;
-                }
-
-                @Override
-                public String getExportTextPrefix() {
-                    return null;
-                }
-
-                @Override
-                public String getRenderTextPrefix() {
-                    return "";
-                }
-            };
-            problemView.addMessage(msg, uuid);
+            String message = diag.getMessage();
+            if(diag.getSource()!=null)
+                message= diag.getMessage()+" ["+diag.getSource()+"]";
+            MessageType type = getMessageType(diag.getSeverity());
+            int t =  type == MessageType.ERROR ? MessageCategory.ERROR : type == MessageType.WARNING ? MessageCategory.WARNING: MessageCategory.INFORMATION;
+            this.diagViewPanel.addMessage(t, new String[]{message},vf,start.getLine(),start.getLine(),vf);
         });
 
         //clean old quickFixes and add new ones
@@ -529,7 +497,6 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
 
     @Override
     public void showMessage(@NotNull MessageParams messageParams) {
-        //showMessage(messageParams.getType() + ": " + messageParams.getMessage());
         NotificationType type;
         switch (messageParams.getType()){
             case Warning:
@@ -545,34 +512,6 @@ public class LanguageClient implements org.eclipse.lsp4j.services.LanguageClient
                 break;
         }
         Notifications.Bus.notify(new Notification("lsp", messageParams.getType().toString(), messageParams.getMessage(),type), project);
-    }
-
-    public void showMessage(String msg) {
-        WriteCommandAction.runWriteCommandAction(project, () -> {
-
-            for (Editor editor : EditorFactory.getInstance().getAllEditors()) {
-                int flags = HintManager.HIDE_BY_ANY_KEY | HintManager.HIDE_BY_TEXT_CHANGE | HintManager.HIDE_BY_OTHER_HINT | HintManager.HIDE_BY_SCROLLING;
-                JComponent hintText = new JLabel(msg);
-                LightweightHint hint = new LightweightHint(hintText);
-                Point p = HintManagerImpl.getHintPosition(hint, editor, editor.xyToLogicalPosition(MouseInfo.getPointerInfo().getLocation()), HintManager.ABOVE);
-                HintManagerImpl.getInstanceImpl().showEditorHint(hint,
-                        editor,
-                        p,
-                        flags,
-                        -1,
-                        true,
-                        HintManagerImpl.createHintHint(editor,
-                                p,
-                                hint,
-                                HintManager.ABOVE).setContentActive(true));
-/*
-                Messages.showMessageDialog(project,
-                        messageParams.getMessage(),
-                        messageParams.getType().toString(),
-                        Messages.getInformationIcon());
- */
-            }
-        });
     }
 
     @Override

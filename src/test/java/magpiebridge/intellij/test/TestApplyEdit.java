@@ -6,7 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.project.Project;
-import magpiebridge.intellij.client.LanguageClient;
+import magpiebridge.intellij.client.MagpieLanguageClient;
 import org.eclipse.lsp4j.*;
 
 import java.util.Collections;
@@ -19,7 +19,7 @@ public class TestApplyEdit extends AnAction {
         FileEditor editor = e.getData(PlatformDataKeys.FILE_EDITOR);
 
         EchoServer server = new EchoServer();
-        LanguageClient lc = new LanguageClient(project, server);
+        MagpieLanguageClient lc = new MagpieLanguageClient(project, server);
         server.connect(lc);
 
         ApplyWorkspaceEditParams params = new ApplyWorkspaceEditParams();

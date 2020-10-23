@@ -3,6 +3,7 @@ package magpiebridge.intellij.test;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import magpiebridge.intellij.client.MagpieLanguageClient;
 import magpiebridge.intellij.plugin.Service;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -32,8 +33,8 @@ public class TestRemoteServer extends AnAction {
             es.connect(clientLauncher.getRemoteProxy());
             clientLauncher.startListening();
 
-            magpiebridge.intellij.client.LanguageClient client =
-                    new magpiebridge.intellij.client.LanguageClient(p, es);
+            MagpieLanguageClient client =
+                    new MagpieLanguageClient(p, es);
             Launcher<LanguageServer> serverLauncher =
                     LSPLauncher.createClientLauncher(client, clientIn, clientOut);
             serverLauncher.startListening();

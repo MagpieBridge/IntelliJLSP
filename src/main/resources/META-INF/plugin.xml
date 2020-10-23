@@ -37,9 +37,6 @@
         <component>
             <implementation-class>magpiebridge.intellij.plugin.QuickFixes</implementation-class>
         </component>
-        <!--<component>
-            <implementation-class>magpiebridge.intellij.plugin.ProjectLSPService</implementation-class>
-        </component>-->
     </project-components>
 
     <actions>

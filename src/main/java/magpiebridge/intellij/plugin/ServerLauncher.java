@@ -5,8 +5,7 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
-import io.netty.util.concurrent.Promise;
-import magpiebridge.intellij.client.LanguageClient;
+import magpiebridge.intellij.client.MagpieLanguageClient;
 import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -15,7 +14,6 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -67,7 +65,7 @@ public class ServerLauncher {
         } else {
             dir = project.getBasePath();
         }
-        LanguageClient client = new LanguageClient(project);
+        MagpieLanguageClient client = new MagpieLanguageClient(project);
         org.eclipse.lsp4j.jsonrpc.Launcher<LanguageServer> serverLauncher = null;
 
         if (Channel.STDIO.equals(channel)) {
