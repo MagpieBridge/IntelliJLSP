@@ -50,10 +50,9 @@
     </extensions>
 
     <actions>
-        <!--
-                <action class="org.wso2.lsp4intellij.actions.LSPReformatAction" id="ReformatCode" use-shortcut-of="ReformatCode" overrides="true" text="Reformat Code"/>
-                <action class="org.wso2.lsp4intellij.actions.LSPShowReformatDialogAction" id="ShowReformatFileDialog" use-shortcut-of="ShowReformatFileDialog" overrides="true" text="Show Reformat File Dialog"/>
-        -->
+        <action class="org.wso2.lsp4intellij.actions.LSPReformatAction" id="ReformatCode" use-shortcut-of="ReformatCode" overrides="true" text="Reformat Code"/>
+        <action class="org.wso2.lsp4intellij.actions.LSPShowReformatDialogAction" id="ShowReformatFileDialog" use-shortcut-of="ShowReformatFileDialog" overrides="true" text="Show Reformat File Dialog"/>
+
         <action class="org.wso2.lsp4intellij.actions.LSPReferencesAction" id="LSPFindUsages">
             <keyboard-shortcut first-keystroke="shift alt F7" keymap="$default"/>
         </action>
