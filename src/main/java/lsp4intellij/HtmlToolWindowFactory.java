@@ -30,21 +30,14 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
     final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(HtmlToolWindowFactory.ID);
 
     // not initialized/opened yet or hidden -> lazyload: update HTML when user opens the panel
-    if( browser == null || (toolWindow != null && toolWindow.isActive() && !toolWindow.isVisible()) ){
-      htmlcontent = content;
-      showUiUpdate(project);
-    }else {
-      ApplicationUtils.invokeLater(() -> {
+    ApplicationUtils.invokeLater(() -> {
+      if (browser == null || (toolWindow != null && toolWindow.isActive() && !toolWindow.isVisible())) {
+        htmlcontent = content;
+        showUiUpdate(project);
+      } else {
         browser.loadHTML(content);
-      });
-
-      /*
-      Platform.runLater(()->{
-        htmlViewer.getEngine().setJavaScriptEnabled(true);
-        htmlViewer.getEngine().loadContent(content);
-      });
-      */
-    }
+      }
+    });
   }
 
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -89,26 +82,6 @@ public final class HtmlToolWindowFactory implements ToolWindowFactory {
       browser = new JBCefBrowser();
       browser.loadHTML(htmlcontent != null ? htmlcontent : "<html> There is nothing to show at the moment. </html>");
       return browser.getComponent();
-
-    /*
-    ToolWindow toolWindow = ToolWindowManager.getInstance(project).registerToolWindow(HtmlToolWindowFactory.ID, false, ToolWindowAnchor.BOTTOM);
-    toolWindow.getComponent().add( browser.getComponent());
-
-    JFXPanel fxPanel = new JFXPanel();
-    JComponent component = toolWindow.getComponent();
-    Platform.setImplicitExit(false);
-    Platform.runLater(() -> {
-      Group root  =  new Group();
-      Scene scene  =  new  Scene(root, javafx.scene.paint.Color.WHITE);
-      htmlViewer = new WebView();
-      htmlViewer.getEngine().loadContent("<html>Hello World :)</html>");
-      htmlViewer.setPrefWidth( toolWindow.getComponent().getWidth() );
-      root.getChildren().add(htmlViewer);
-      fxPanel.setScene(scene);
-    });
-    return fxPanel;
-    */
-
   }
 
   private static void showUiUpdate(Project project){
