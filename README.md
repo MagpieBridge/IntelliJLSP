@@ -1,6 +1,21 @@
 # IntelliJLSP
 
 This is a IntelliJ Plugin which supports the language server protocol. It is made for the [MagpieBridge](https://github.com/MagpieBridge/MagpieBridge) framework.
+## Supported Features: 
+-  publishDiagnostics: 
+    - Diagnositcs are listed in a seperate Tool Window at the bottom of the IDE. 
+    - The issued code is underlined. 
+    - Hovering over the issued code dispalys the warning message and related information. 
+    - Related information with code locations can be directly navigated on clicking
+-  Code Actions
+-  Hover 
+-  ShowMessage
+-  ShowMessageRequest
+-  ShowHTML (not in LSP): this feature display a HTML page from the language server in a Tool Window at the bottom of the IDE. 
+
+## Supported Channel
+- Standard I/O
+- Sockets 
 
 ## How to install it?
 - Download [MagpieBridgeLSPSupport-1.1.zip](https://github.com/MagpieBridge/IntelliJLSP/releases/download/v1.1/MagpieBridgeLSPSupport-1.1.zip) from the release page.
