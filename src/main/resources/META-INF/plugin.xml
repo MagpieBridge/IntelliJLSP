@@ -30,15 +30,15 @@
         <projectService serviceImplementation="magpiebridge.intellij.plugin.ProjectService"/>
         <postStartupActivity implementation="magpiebridge.intellij.plugin.ProjectStartActivity"/>
 
-        <!--
-        <completion.contributor implementationClass="org.wso2.lsp4intellij.contributors.LSPCompletionContributor" id="LSPCompletionContributor" language="any"/>
-        -->
         <externalAnnotator id="LSPAnnotator" language="TEXT"
                            implementationClass="org.wso2.lsp4intellij.contributors.annotator.LSPAnnotator"/>
         <gotoSymbolContributor implementation="org.wso2.lsp4intellij.contributors.symbol.LSPSymbolContributor"
                                id="LSPSymbolContributor"/>
 
         <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler" id="LSPTypedHandler"/>
+        <!-- TODO:check
+        <completion.contributor implementationClass="org.wso2.lsp4intellij.contributors.LSPCompletionContributor" id="LSPCompletionContributor" language="any"/>
+        -->
         <!--
                 <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler" id="LSPRenameHandler" order="first"/>
                 <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor" id="LSPRenameProcessor" order="first"/>
