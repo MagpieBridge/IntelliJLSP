@@ -47,6 +47,8 @@
         <toolWindow id="Magpie Control Panel" secondary="true" icon="AllIcons.General.Modified" anchor="bottom"
                     factoryClass="lsp4intellij.HtmlToolWindowFactory"/>
 
+        <lang.psiStructureViewFactory language="TEXT" implementationClass="org.wso2.lsp4intellij.contributors.symbol.LSPStructureViewFactory"/>
+
     </extensions>
 
     <actions>
