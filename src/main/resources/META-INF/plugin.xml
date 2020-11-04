@@ -49,6 +49,9 @@
 
         <lang.psiStructureViewFactory language="TEXT" implementationClass="org.wso2.lsp4intellij.contributors.symbol.LSPStructureViewFactory"/>
 
+        <codeInsight.lineMarkerProvider language="TEXT" implementationClass="org.wso2.lsp4intellij.contributors.symbol.LineMarkerProvider"/>
+
+
     </extensions>
 
     <actions>
