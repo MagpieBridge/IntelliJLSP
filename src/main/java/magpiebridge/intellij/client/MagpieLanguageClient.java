@@ -220,7 +220,7 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
           Group root = new Group();
           Scene scene = new Scene(root, javafx.scene.paint.Color.WHITE);
           htmlViewer = new WebView();
-          htmlViewer.getEngine().loadContent("<html>Hello</html>");
+          htmlViewer.getEngine().loadContent("<html>Loading</html>");
           htmlViewer.setPrefWidth(1200);
           root.getChildren().add(htmlViewer);
           fxPanel.setScene(scene);
