@@ -1,16 +1,17 @@
 package magpiebridge.intellij.plugin;
 
+import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
+import java.io.File;
+
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.vfs.VirtualFile;
-import java.awt.*;
-import java.io.File;
-import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
@@ -123,7 +124,7 @@ public class Configuration implements Configurable {
     JRadioButton commandTwoRadio =
         new JRadioButton("Option 2: run java -cp [class path] [main class] [program arguments]");
 
-    final boolean isCommandOne = jarPath.isEmpty();
+    final boolean isCommandOne = !jarPath.isEmpty();
     commandOneRadio.setSelected(isCommandOne);
     commandTwoRadio.setSelected(!isCommandOne);
 

@@ -2,8 +2,19 @@
 // another line to hack
 package magpiebridge.intellij.client;
 
-import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
-import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import com.intellij.compiler.progress.CompilerTask;
 import com.intellij.ide.errorTreeView.ErrorViewStructure;
@@ -47,23 +58,11 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.util.ui.MessageCategory;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import magpiebridge.intellij.plugin.QuickFixes;
 import magpiebridge.intellij.plugin.Util;
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
@@ -87,6 +86,8 @@ import org.eclipse.lsp4j.jsonrpc.services.JsonNotification;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
+import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 public class MagpieLanguageClient implements org.eclipse.lsp4j.services.LanguageClient {
 
@@ -206,33 +207,39 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
   }
 
   public MagpieLanguageClient(Project project) {
-    this.project = project;
-    this.quickFixes = project.getComponent(QuickFixes.class);
-
-    // add control panel window
-    this.controlViewWindow =
-        ToolWindowManager.getInstance(project)
-            .registerToolWindow(controlViewID, false, ToolWindowAnchor.BOTTOM);
-    JFXPanel fxPanel = new JFXPanel();
-    Platform.setImplicitExit(false);
-    Platform.runLater(
-        () -> {
-          Group root = new Group();
-          Scene scene = new Scene(root, javafx.scene.paint.Color.WHITE);
-          htmlViewer = new WebView();
-          htmlViewer.getEngine().loadContent("<html>Loading</html>");
-          htmlViewer.setPrefWidth(1200);
-          root.getChildren().add(htmlViewer);
-          fxPanel.setScene(scene);
-        });
-    this.controlViewWindow.getComponent().getParent().add(fxPanel);
-
-    // add diagnostics window
-    this.diagViewWindow =
-        ToolWindowManager.getInstance(project)
-            .registerToolWindow(diagViewID, false, ToolWindowAnchor.BOTTOM);
-    this.diagViewPanel = new NewErrorTreeViewPanel(project, null);
-    this.diagViewWindow.getComponent().add(diagViewPanel);
+      this.project = project;
+      this.quickFixes = project.getComponent(QuickFixes.class);
+      JFXPanel fxPanel = new JFXPanel();
+      this.diagViewPanel = new NewErrorTreeViewPanel(project, null);
+      SwingUtilities.invokeLater(() -> {
+          // add control panel window
+          if (ToolWindowManager.getInstance(project).getToolWindow(controlViewID) == null) {
+              this.controlViewWindow =
+                  ToolWindowManager.getInstance(project)
+                                   .registerToolWindow(controlViewID, false, ToolWindowAnchor.BOTTOM);
+          } else
+              this.controlViewWindow = ToolWindowManager.getInstance(project).getToolWindow(controlViewID);
+          this.controlViewWindow.getComponent().getParent().add(fxPanel);
+          // add diagnostics window
+          if (ToolWindowManager.getInstance(project).getToolWindow(diagViewID) == null)
+              this.diagViewWindow =
+                  ToolWindowManager.getInstance(project)
+                                   .registerToolWindow(diagViewID, false, ToolWindowAnchor.BOTTOM);
+          else
+              this.diagViewWindow = ToolWindowManager.getInstance(project).getToolWindow(diagViewID);
+          this.diagViewWindow.getComponent().add(diagViewPanel);
+      });
+      Platform.setImplicitExit(false);
+      Platform.runLater(
+          () -> {
+              Group root = new Group();
+              Scene scene = new Scene(root, javafx.scene.paint.Color.WHITE);
+              htmlViewer = new WebView();
+              htmlViewer.getEngine().loadContent("<html>Loading</html>");
+              htmlViewer.setPrefWidth(1200);
+              root.getChildren().add(htmlViewer);
+              fxPanel.setScene(scene);
+          });
   }
 
   public void connect(LanguageServer server) {
