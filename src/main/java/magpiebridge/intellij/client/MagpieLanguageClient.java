@@ -223,12 +223,14 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
               this.controlViewWindow = ToolWindowManager.getInstance(project).getToolWindow(controlViewID);
           this.controlViewWindow.getComponent().getParent().add(fxPanel);
           // add diagnostics window
-          if (ToolWindowManager.getInstance(project).getToolWindow(diagViewID) == null)
+          if (ToolWindowManager.getInstance(project).getToolWindow(diagViewID) == null){
               this.diagViewWindow =
                   ToolWindowManager.getInstance(project)
                                    .registerToolWindow(diagViewID, false, ToolWindowAnchor.BOTTOM);
-          else
+          }
+          else {
               this.diagViewWindow = ToolWindowManager.getInstance(project).getToolWindow(diagViewID);
+          }
           this.diagViewWindow.getComponent().add(diagViewPanel);
       });
       Platform.setImplicitExit(false);
@@ -335,7 +337,6 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
           this.diagViewPanel.addMessage(
               t, new String[] {message}, vf, start.getLine(), start.getLine(), vf);
         });
-
     // clean old quickFixes and add new ones
     quickFixes.clear();
     diagnostics.forEach((diag) -> quickFixes.addDiagnostic(doc, vf.getUrl(), diag, server));
