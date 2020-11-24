@@ -46,7 +46,6 @@ import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
@@ -318,7 +317,6 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
     ErrorViewStructure structure = this.diagViewPanel.getErrorViewStructure();
     structure.removeGroup(vf.getPath());
     this.diagViewPanel.reload();
-
     Document doc = Util.getDocument(vf);
     List<Diagnostic> diagnostics = publishedDiagnostics.get(vf);
     diagnostics.forEach(
@@ -640,7 +638,6 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
                    inputValues.put(message,input);
                }
             });
-
         return CompletableFuture.completedFuture(inputValues);
     }
 }

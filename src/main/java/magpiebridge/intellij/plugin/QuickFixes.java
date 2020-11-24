@@ -157,6 +157,8 @@ public class QuickFixes extends AbstractIntentionAction {
       Range range,
       LanguageServer server,
       List<? extends Either<Command, CodeAction>> actions) {
+      if(actions.isEmpty())
+          return;
     Position start = range.getStart();
     int startOffset = doc.getLineStartOffset(start.getLine()) + start.getCharacter();
     Position end = range.getEnd();

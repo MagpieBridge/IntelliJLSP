@@ -1,32 +1,6 @@
 package magpiebridge.intellij.plugin;
 
-import com.google.gson.JsonObject;
-import com.intellij.AppTopics;
-import com.intellij.codeInsight.hint.HintManager;
-import com.intellij.codeInsight.hint.HintManagerImpl;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.editor.EditorGutterAction;
-import com.intellij.openapi.editor.LogicalPosition;
-import com.intellij.openapi.editor.TextAnnotationGutterProvider;
-import com.intellij.openapi.editor.colors.ColorKey;
-import com.intellij.openapi.editor.colors.EditorFontType;
-import com.intellij.openapi.editor.event.EditorMouseEvent;
-import com.intellij.openapi.editor.event.EditorMouseEventArea;
-import com.intellij.openapi.editor.event.EditorMouseMotionListener;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.FileEditorManagerListener;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.LightweightHint;
-import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.MessageBusConnection;
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,10 +9,43 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.swing.*;
+
+import com.google.gson.JsonObject;
+import com.intellij.AppTopics;
+import com.intellij.codeInsight.hint.HintManager;
+import com.intellij.codeInsight.hint.HintManagerImpl;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorCustomElementRenderer;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.EditorGutterAction;
+import com.intellij.openapi.editor.Inlay;
+import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.openapi.editor.TextAnnotationGutterProvider;
+import com.intellij.openapi.editor.colors.ColorKey;
+import com.intellij.openapi.editor.colors.EditorFontType;
+import com.intellij.openapi.editor.event.EditorMouseEvent;
+import com.intellij.openapi.editor.event.EditorMouseEventArea;
+import com.intellij.openapi.editor.event.EditorMouseMotionListener;
+import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.JBColor;
+import com.intellij.ui.LightweightHint;
+import com.intellij.util.messages.MessageBus;
+import com.intellij.util.messages.MessageBusConnection;
 import magpiebridge.intellij.client.MagpieLanguageClient;
 import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.CodeActionCapabilities;
 import org.eclipse.lsp4j.CodeActionContext;
+import org.eclipse.lsp4j.CodeActionKindCapabilities;
+import org.eclipse.lsp4j.CodeActionLiteralSupportCapabilities;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.CodeLens;
 import org.eclipse.lsp4j.CodeLensParams;
@@ -47,6 +54,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.ExecuteCommandCapabilities;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
@@ -54,10 +62,13 @@ import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PublishDiagnosticsCapabilities;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentClientCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.WorkspaceClientCapabilities;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
@@ -95,84 +106,6 @@ public class Service {
       return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
     }
   }
-
-  private final class GutterAnnotations implements TextAnnotationGutterProvider {
-
-    public GutterAnnotations(List<? extends CodeLens> lenses) {
-      this.lenses = new LinkedHashMap<>();
-      lenses.forEach(cl -> this.lenses.put(cl.getRange().getStart().getLine(), cl));
-    }
-
-    private final Map<Integer, CodeLens> lenses;
-
-    @Nullable
-    @Override
-    public String getToolTip(int i, Editor editor) {
-      if (lenses.containsKey(i)) {
-        StringBuffer msg = new StringBuffer(lenses.get(i).getCommand().getCommand());
-        msg.append("(");
-        lenses
-            .get(i)
-            .getCommand()
-            .getArguments()
-            .forEach(
-                s -> {
-                  msg.append(s.toString()).append(" ");
-                });
-        msg.append(")");
-        return msg.toString();
-      } else {
-        return null;
-      }
-    }
-
-    @Nullable
-    @Override
-    public String getLineText(int i, Editor editor) {
-      return lenses.containsKey(i) ? lenses.get(i).getCommand().getCommand() : null;
-    }
-
-    @Override
-    public EditorFontType getStyle(int i, Editor editor) {
-      return EditorFontType.BOLD;
-    }
-
-    @Nullable
-    @Override
-    public ColorKey getColor(int i, Editor editor) {
-      return ColorKey.createColorKey("LSP", Color.BLUE);
-    }
-
-    @Nullable
-    @Override
-    public Color getBgColor(int i, Editor editor) {
-      return editor.getColorsScheme().getDefaultBackground();
-    }
-
-    @Override
-    public List<AnAction> getPopupActions(int i, Editor editor) {
-      return Collections.singletonList(
-          new AnAction() {
-            @Override
-            public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-              Command c = lenses.get(i).getCommand();
-              ExecuteCommandParams params = new ExecuteCommandParams();
-              params.setCommand(c.getCommand());
-              params.setArguments(c.getArguments());
-              server.getWorkspaceService().executeCommand(params);
-            }
-          });
-    }
-
-    @Override
-    public void gutterClosed() {}
-  }
-  ;
-
-  private final LanguageServer server;
-
-  private final Project project;
-  private QuickFixes codeActions;
 
   public Service(Project project, LanguageServer server, LanguageClient lc) {
     this.project = project;
@@ -239,7 +172,7 @@ public class Service {
 
                       server.getTextDocumentService().didOpen(params);
 
-                      CodeLensParams clp = new CodeLensParams();
+                     /* CodeLensParams clp = new CodeLensParams();
                       TextDocumentIdentifier tdi = new TextDocumentIdentifier();
                       tdi.setUri(Util.fixUrl(file.getUrl()));
                       clp.setTextDocument(tdi);
@@ -260,19 +193,22 @@ public class Service {
                                           }
                                         });
                               });
+                        */
 
-                      /*
-                      CodeLensParams clp = new CodeLensParams();
-                      server.getTextDocumentService().codeLens(clp).thenAccept(cls -> {
-                          cls.forEach(cl -> {
-                              Range clr = cl.getRange();
-                              Position clpos = clr.getEnd();
-                              for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
-                                   e.getInlayModel().addInlineElement(
-                                          intelliJDoc.getLineStartOffset(clpos.getLine()) + clpos.getCharacter(),
-                                          new EditorCustomElementRenderer() {
-                                              @Override
-                                              public int calcWidthInPixels(@NotNull Inlay inlay) {
+                        CodeLensParams clp = new CodeLensParams();
+                        TextDocumentIdentifier tdi = new TextDocumentIdentifier();
+                        tdi.setUri(Util.fixUrl(file.getUrl()));
+                        clp.setTextDocument(tdi);
+                        server.getTextDocumentService().codeLens(clp).thenAccept(cls -> {
+                            cls.forEach(cl -> {
+                                Range clr = cl.getRange();
+                                Position clpos = clr.getEnd();
+                                for (Editor e : EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
+                                    e.getInlayModel().addInlineElement(
+                                        intelliJDoc.getLineStartOffset(clpos.getLine()) + clpos.getCharacter(),
+                                        new EditorCustomElementRenderer() {
+                                            @Override
+                                            public int calcWidthInPixels(@NotNull Inlay inlay) {
                                                   return 35;
                                               }
 
@@ -291,7 +227,7 @@ public class Service {
                               };
                            });
                       });
-                      */
+
 
                       for (Editor e :
                           EditorFactory.getInstance().getEditors(intelliJDoc, project)) {
@@ -401,19 +337,120 @@ public class Service {
             });
   }
 
+    private final LanguageServer server;
+
+  private final Project project;
+  private QuickFixes codeActions;
+
   private InitializeParams createInitializeParams(String rootPath) {
-    // TODO. add other capabilities
-    InitializeParams init = new InitializeParams();
-    init.setRootUri(
-        Util.fixUrl(rootPath.startsWith("/") ? "file:" + rootPath : "file:///" + rootPath));
-    init.setTrace("verbose");
-    ClientCapabilities clientCapabilities = new ClientCapabilities();
-    JsonObject experimental = new JsonObject();
-    experimental.addProperty("supportsShowHTML", true);
-    experimental.addProperty("supportsShowInputBox", true);
-    clientCapabilities.setExperimental(experimental);
-    init.setCapabilities(clientCapabilities);
-    return init;
+      // TODO. add other capabilities
+      InitializeParams init = new InitializeParams();
+      init.setRootUri(
+          Util.fixUrl(rootPath.startsWith("/") ? "file:" + rootPath : "file:///" + rootPath));
+      init.setTrace("verbose");
+      ClientCapabilities clientCapabilities = new ClientCapabilities();
+      JsonObject publishDiagnostics = new JsonObject();
+      publishDiagnostics.addProperty("relatedInformation", true);
+      TextDocumentClientCapabilities textCap = new TextDocumentClientCapabilities();
+      PublishDiagnosticsCapabilities pubCap = new PublishDiagnosticsCapabilities();
+      pubCap.setRelatedInformation(true);
+      textCap.setPublishDiagnostics(pubCap);
+      CodeActionCapabilities caCap = new CodeActionCapabilities();
+      CodeActionLiteralSupportCapabilities support = new CodeActionLiteralSupportCapabilities();
+      CodeActionKindCapabilities kind = new CodeActionKindCapabilities();
+      List<String> kinds = new ArrayList<>();
+      kinds.add("");
+      kinds.add("quickfix");
+      kinds.add("source");
+      kind.setValueSet(kinds);
+      support.setCodeActionKind(kind);
+      caCap.setCodeActionLiteralSupport(support);
+      textCap.setCodeAction(caCap);
+      clientCapabilities.setTextDocument(textCap);
+      WorkspaceClientCapabilities workCap = new WorkspaceClientCapabilities();
+      ExecuteCommandCapabilities exeCap = new ExecuteCommandCapabilities();
+      exeCap.setDynamicRegistration(true);
+      workCap.setExecuteCommand(exeCap);
+      clientCapabilities.setWorkspace(workCap);
+      JsonObject experimental = new JsonObject();
+      experimental.addProperty("supportsShowHTML", true);
+      experimental.addProperty("supportsShowInputBox", true);
+      clientCapabilities.setExperimental(experimental);
+      init.setCapabilities(clientCapabilities);
+      return init;
+  }
+
+  private final class GutterAnnotations implements TextAnnotationGutterProvider {
+
+    public GutterAnnotations(List<? extends CodeLens> lenses) {
+      this.lenses = new LinkedHashMap<>();
+      lenses.forEach(cl -> this.lenses.put(cl.getRange().getStart().getLine(), cl));
+    }
+
+    private final Map<Integer, CodeLens> lenses;
+
+    @Nullable
+    @Override
+    public String getToolTip(int i, Editor editor) {
+      if (lenses.containsKey(i)) {
+        StringBuffer msg = new StringBuffer(lenses.get(i).getCommand().getCommand());
+        msg.append("(");
+        lenses
+            .get(i)
+            .getCommand()
+            .getArguments()
+            .forEach(
+                s -> {
+                  msg.append(s.toString()).append(" ");
+                });
+        msg.append(")");
+        return msg.toString();
+      } else {
+        return null;
+      }
+    }
+
+    @Nullable
+    @Override
+    public String getLineText(int i, Editor editor) {
+        String lineText = lenses.containsKey(i) ? lenses.get(i).getCommand().getCommand() : null;
+        return lineText;
+    }
+
+    @Override
+    public EditorFontType getStyle(int i, Editor editor) {
+      return EditorFontType.BOLD;
+    }
+
+    @Nullable
+    @Override
+    public ColorKey getColor(int i, Editor editor) {
+      return ColorKey.createColorKey("LSP", Color.BLUE);
+    }
+
+    @Nullable
+    @Override
+    public Color getBgColor(int i, Editor editor) {
+      return editor.getColorsScheme().getDefaultBackground();
+    }
+
+    @Override
+    public List<AnAction> getPopupActions(int i, Editor editor) {
+      return Collections.singletonList(
+          new AnAction() {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+              Command c = lenses.get(i).getCommand();
+              ExecuteCommandParams params = new ExecuteCommandParams();
+              params.setCommand(c.getCommand());
+              params.setArguments(c.getArguments());
+              server.getWorkspaceService().executeCommand(params);
+            }
+          });
+    }
+
+    @Override
+    public void gutterClosed() {}
   }
 
   public void shutDown(Runnable andThen) {
