@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 import com.intellij.compiler.progress.CompilerTask;
 import com.intellij.ide.errorTreeView.ErrorViewStructure;
@@ -45,6 +46,7 @@ import com.intellij.openapi.editor.markup.MarkupModel;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
@@ -83,6 +85,7 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.jsonrpc.services.JsonNotification;
+import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -618,4 +621,26 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
           htmlViewer.getEngine().loadContent(content);
         });
   }
+
+   @JsonRequest("magpiebridge/showInputBox")
+   public CompletableFuture<Map<String, String>> showInputBox(String... messages){
+        Map<String, String> inputValues=new HashMap<>();
+        WriteCommandAction.runWriteCommandAction(
+            project,
+            () -> {
+               for(String message: messages) {
+                   String title = "Input required";
+                   Pattern p1 = Pattern.compile("\\b(\\w*(P|p)(A|a)(S|s)(S|s)(W|w)(O|o)(R|r)(D|d)\\w*)\\b");
+                   Pattern p2 = Pattern.compile("\\b(\\w*(P|p)(A|a)(S|s)(S|s)(P|p)(H|h)(R|r)(A|a)(S|s)(E|e)\\w*)\\b");
+                   String input = null;
+                   if(p1.matcher(message).find()||p2.matcher(message).find())
+                       input = Messages.showPasswordDialog(message, title);
+                   else
+                       input  = Messages.showInputDialog(message,title,Messages.getQuestionIcon());
+                   inputValues.put(message,input);
+               }
+            });
+
+        return CompletableFuture.completedFuture(inputValues);
+    }
 }

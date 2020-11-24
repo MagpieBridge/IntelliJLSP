@@ -408,9 +408,10 @@ public class Service {
         Util.fixUrl(rootPath.startsWith("/") ? "file:" + rootPath : "file:///" + rootPath));
     init.setTrace("verbose");
     ClientCapabilities clientCapabilities = new ClientCapabilities();
-    JsonObject showHTML = new JsonObject();
-    showHTML.addProperty("supportsShowHTML", true);
-    clientCapabilities.setExperimental(showHTML);
+    JsonObject experimental = new JsonObject();
+    experimental.addProperty("supportsShowHTML", true);
+    experimental.addProperty("supportsShowInputBox", true);
+    clientCapabilities.setExperimental(experimental);
     init.setCapabilities(clientCapabilities);
     return init;
   }
