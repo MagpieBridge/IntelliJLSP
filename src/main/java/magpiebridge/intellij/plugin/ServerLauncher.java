@@ -36,7 +36,7 @@ public class ServerLauncher {
     String lspLanguageExtensionPattern = pc.getValue(Configuration.FILEPATTERN, ".*");
     boolean commandOptionOne = pc.getBoolean(Configuration.COMMANDOPTION);
     LanguageServerDefinition serverDefinition = null;
-    if (pc.getBoolean(Configuration.CHANNEL)) {
+    if (pc.getBoolean(Configuration.CHANNEL, true)) {
       String currentPath = System.getenv("PATH");
       String path = pc.getValue(Configuration.PATH, "");
       String newPath = currentPath + File.pathSeparator + path;
