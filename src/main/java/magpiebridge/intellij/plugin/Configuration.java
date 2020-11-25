@@ -2,6 +2,7 @@ package magpiebridge.intellij.plugin;
 
 import com.intellij.ide.HelpTooltip;
 import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
@@ -10,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.JBColor;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
+import org.wso2.lsp4intellij.IntellijLanguageClient;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -449,7 +451,11 @@ public class Configuration implements Configurable {
     */
 
     isModified = false;
-    // FIXME: call service via project... TODO: get current project
+
+    final IntellijLanguageClient clientService = ServiceManager.getService(IntellijLanguageClient.class);
+    // reset current config
+    clientService.reset();
+
     project.getService(ProjectService.class).restartServerConnection();
 
   }
