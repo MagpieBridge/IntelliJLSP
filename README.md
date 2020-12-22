@@ -18,7 +18,8 @@ This is a IntelliJ Plugin which supports the language server protocol. It is mad
 - `Working directory (optional)`: directory where the server should observe. If not set, the default is the root path of the current opening project in the IDE. 
 
 ## Build from Source
-Clone this Repo and init the Subprojects `git clone https://github.com/MagpieBridge/IntelliJLSP.git && git submodule update --init`
+Clone this Repo and init the Subprojects
+`git clone --single-branch --branch intellijclientlib https://github.com/MagpieBridge/IntelliJLSP.git && cd IntelliJLSP/ && git submodule update --init`
 
 To build/run the Project from source, import it as a gradle Project into IntelliJ.
 
