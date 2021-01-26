@@ -27,7 +27,7 @@ public class ServerLauncher {
   private static Map<Project, Socket> sockets = new ConcurrentHashMap<>();
   private static Map<Project, Service> services = new ConcurrentHashMap<>();
   private static Map<Project, Future> listening = new ConcurrentHashMap<>();
-
+  private static boolean logging = false;
   public static void launch(Project project) {
 
     projects.add(project);
@@ -91,7 +91,8 @@ public class ServerLauncher {
         }
       }
       proc.command(args);
-      proc.redirectError(new File(dir, "MagpieBridgeLSPSupportError.txt"));
+      if(logging)
+        proc.redirectError(new File(dir, "MagpieBridgeLSPSupportError.txt"));
       try {
 
         Process process = proc.start();
@@ -223,22 +224,28 @@ public class ServerLauncher {
   }
 
   private static InputStream logStream(InputStream is, String logFileName) {
-    File log;
-    try {
-      log = File.createTempFile(logFileName, ".txt");
-      return new TeeInputStream(is, new FileOutputStream(log));
-    } catch (IOException e) {
-      return is;
-    }
+      if(logging){
+        File log;
+        try {
+          log = File.createTempFile(logFileName, ".txt");
+          return new TeeInputStream(is, new FileOutputStream(log));
+        } catch (IOException e) {
+          return is;
+        }
+      } else
+          return is;
   }
 
   private static OutputStream logStream(OutputStream os, String logFileName) {
-    File log;
-    try {
-      log = File.createTempFile(logFileName, ".txt");
-      return new TeeOutputStream(os, new FileOutputStream(log));
-    } catch (IOException e) {
-      return os;
-    }
+      if(logging){
+        File log;
+        try {
+          log = File.createTempFile(logFileName, ".txt");
+          return new TeeOutputStream(os, new FileOutputStream(log));
+        } catch (IOException e) {
+          return os;
+        }
+      }else
+           return os;
   }
 }

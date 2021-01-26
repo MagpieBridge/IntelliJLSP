@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'magpiebrigde.intellij'
-version '1.2'
+version '1.3'
 
 apply plugin: 'java'
 sourceCompatibility = 1.8
