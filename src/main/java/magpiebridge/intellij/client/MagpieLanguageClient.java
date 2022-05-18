@@ -374,8 +374,6 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
         project,
         () -> {
           MarkupModel markup = editor.getMarkupModel();
-          markup.addLineHighlighter(start.getLine(), HighlighterLayer.WEAK_WARNING, attr);
-          markup.addLineHighlighter(end.getLine(), HighlighterLayer.WEAK_WARNING, attr);
           markup.addRangeHighlighter(
               startOffset,
               endOffset,
