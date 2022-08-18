@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
+import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.compiler.progress.CompilerTask;
 import com.intellij.ide.errorTreeView.ErrorViewStructure;
 import com.intellij.ide.errorTreeView.NewErrorTreeViewPanel;
@@ -59,13 +60,10 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.util.ui.MessageCategory;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.web.WebView;
+
 import magpiebridge.intellij.plugin.QuickFixes;
 import magpiebridge.intellij.plugin.Util;
+import org.cef.browser.CefBrowser;
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
 import org.eclipse.lsp4j.CodeAction;
@@ -88,6 +86,7 @@ import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
@@ -196,7 +195,9 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
   private LanguageServer server;
   private final QuickFixes quickFixes;
   private final Map<VirtualFile, List<Diagnostic>> publishedDiagnostics = new HashMap<>();
-  private WebView htmlViewer;
+
+  private JPanel jPanel;
+
   private NewErrorTreeViewPanel diagViewPanel;
   private ToolWindow diagViewWindow;
   private ToolWindow controlViewWindow;
@@ -210,9 +211,13 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
 
   public MagpieLanguageClient(Project project) {
       this.project = project;
+
       this.quickFixes = project.getComponent(QuickFixes.class);
-      JFXPanel fxPanel = new JFXPanel();
+
+      jPanel = new JPanel(new BorderLayout());
+
       this.diagViewPanel = new NewErrorTreeViewPanel(project, null);
+
       SwingUtilities.invokeLater(() -> {
           // add control panel window
           if (ToolWindowManager.getInstance(project).getToolWindow(controlViewID) == null) {
@@ -221,7 +226,7 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
                                    .registerToolWindow(controlViewID, false, ToolWindowAnchor.BOTTOM);
           } else
               this.controlViewWindow = ToolWindowManager.getInstance(project).getToolWindow(controlViewID);
-          this.controlViewWindow.getComponent().getParent().add(fxPanel);
+          this.controlViewWindow.getComponent().getParent().add(jPanel);
           // add diagnostics window
           if (ToolWindowManager.getInstance(project).getToolWindow(diagViewID) == null){
               this.diagViewWindow =
@@ -233,17 +238,10 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
           }
           this.diagViewWindow.getComponent().add(diagViewPanel);
       });
-      Platform.setImplicitExit(false);
-      Platform.runLater(
-          () -> {
-              Group root = new Group();
-              Scene scene = new Scene(root, javafx.scene.paint.Color.WHITE);
-              htmlViewer = new WebView();
-              htmlViewer.getEngine().loadContent("<html>Loading</html>");
-              htmlViewer.setPrefWidth(1200);
-              root.getChildren().add(htmlViewer);
-              fxPanel.setScene(scene);
-          });
+
+      JBCefBrowser myBrowser = new JBCefBrowser();
+      myBrowser.loadHTML("<html>Loading</html>");
+      jPanel.add(myBrowser.getComponent(), BorderLayout.CENTER);
   }
 
   public void connect(LanguageServer server) {
@@ -614,11 +612,11 @@ public class MagpieLanguageClient implements org.eclipse.lsp4j.services.Language
 
   @JsonNotification("magpiebridge/showHTML")
   public void showHTML(String content) {
-    Platform.runLater(
-        () -> {
-          htmlViewer.getEngine().setJavaScriptEnabled(true);
-          htmlViewer.getEngine().loadContent(content);
-        });
+      jPanel.remove(0);
+      JBCefBrowser jbCefBrowserTemp = new JBCefBrowser();
+      jbCefBrowserTemp.loadHTML(content);
+
+      jPanel.add(jbCefBrowserTemp.getComponent(), BorderLayout.CENTER);
   }
 
    @JsonRequest("magpiebridge/showInputBox")
